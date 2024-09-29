@@ -1,0 +1,71 @@
+% Define edges
+edge(0,1,4). edge(0,7,8). edge(1,7,11). edge(1,2,8).
+edge(2,3,7). edge(2,5,4). edge(2,8,2). edge(3,4,9).
+edge(3,5,14). edge(4,5,10). edge(5,6,2). edge(6,7,1).
+edge(6,8,6). edge(7,8,7).
+
+:- dynamic mst_edge/3.
+:- dynamic in_mst/1.
+:- dynamic visited/1.
+
+is_edge(X,Y,Cost) :- edge(X,Y,Cost); edge(Y,X,Cost).
+
+find_min_by_cost([(X,Y,Cost)|T], Min) :- 
+    find_min_by_cost(T,(X,Y,Cost), Min).
+find_min_by_cost([(X,Y,Cost)|T],(_,_,CurrentCost),Min) :- 
+    Cost < CurrentCost, !, 
+    find_min_by_cost(T,(X,Y,Cost),Min).
+find_min_by_cost([_|T],CurrentMin,Min) :- 
+    find_min_by_cost(T,CurrentMin,Min).
+find_min_by_cost([],Min,Min).
+
+delete_first_occurence([X|T],X,T) :- !.
+delete_first_occurence([H|T],X,[H|Rez]) :- 
+    delete_first_occurence(T,X,Rez).
+
+sort_edges(List,[Min|Sorted]) :- 
+    find_min_by_cost(List,Min),
+    delete_first_occurence(List,Min,Rez), 
+    sort_edges(Rez,Sorted).
+sort_edges([],[]).
+
+find_vertex_nr(Nr) :- 
+    findall(X,condition(X),List), 
+    length(List,Nr).
+
+condition(X) :- is_edge(X,_,_),not(visited(X)),assertz(visited(X)).
+
+find_edges_and_sort(Sorted) :- 
+    findall((X,Y,Cost),edge(X,Y,Cost),List), 
+    sort_edges(List,Sorted).
+
+mst_kruskal :- 
+    find_vertex_nr(Nr), 
+    NrEdges is Nr-1, 
+    find_edges_and_sort(List), 
+    mst_kruskal_helper(List,NrEdges).
+
+mst_kruskal_helper(_,0).
+mst_kruskal_helper([(X,Y,Cost)|T],Nr) :- 
+    verify_the_edge((X,Y,Cost),Nr,NrNew),
+    mst_kruskal_helper(T,NrNew).
+
+verify_the_edge((X,Y,Cost),Nr,NrNew) :- 
+    not(closes_cycle(X,Y)), !, 
+    assertz(mst_edge(X,Y,Cost)), 
+    assert_nodes(X,Y), 
+    NrNew is Nr-1.
+verify_the_edge(_,Nr,Nr).
+
+closes_cycle(X,Y):-in_mst(X),in_mst(Y), !.
+assert_nodes(X,Y) :- 
+    not(in_mst(X)), not(in_mst(Y)), !, 
+    assertz(in_mst(X)), assertz(in_mst(Y)). 
+assert_nodes(X,_) :- not(in_mst(X)), !, assertz(in_mst(X)).
+assert_nodes(_,Y) :- not(in_mst(Y)), !, assertz(in_mst(Y)).
+assert_nodes(_,_).
+
+
+
+
+

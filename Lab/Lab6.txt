@@ -1,0 +1,137 @@
+flatten([H|T],[H|R]) :-
+    atomic(H), !, flatten(T,R).
+flatten([H|T],R) :-
+    flatten(H,RH), 
+    flatten(T,RT), 
+    append(RH,RT,R).
+flatten([],[]).
+
+%verificam daca e lista cu atomic, daca 
+%e lista apelam recursiv pe H
+max(A, B, A):- A>B, !.
+max(_, B, B).
+
+skip([],[]).
+skip([H|T],R):- atomic(H),
+    !,
+    skip(T,R).
+skip([H|T],[H|R]):- skip(T,R).
+
+heads([],[]).
+heads([H|T],[H|R]):- atomic(H),
+    !,
+    skip(T,T1),
+    heads(T1,R).
+heads([H|T],R):- heads(H,R1),
+    heads(T,R2),append(R1,R2,R).
+
+
+%1.
+count_atomic(L,Rez) :-
+    count_atomic(L,0,Rez).
+count_atomic([H|T],Acc,Rez) :-
+    atomic(H), !, 
+    AccNew is Acc + 1, 
+    count_atomic(T,AccNew,Rez).
+count_atomic([H|T],Acc,Rez) :-
+    count_atomic(H,Acc,HRez),
+    count_atomic(T,TRez),
+    Rez is HRez + TRez.
+count_atomic([],Acc,Acc).
+
+%2.
+sum_atomic(L,Rez) :-
+    sum_atomic(L,0,Rez).
+sum_atomic([H|T],Acc,Rez) :-
+    atomic(H), !,
+    AccNew is Acc + H,
+    sum_atomic(T,AccNew,Rez).
+sum_atomic([H|T],Acc,Rez) :-
+    sum_atomic(H,Acc,HRez),
+    sum_atomic(T,TRez),
+    Rez is HRez + TRez.
+sum_atomic([],Acc,Acc).
+
+%3.
+member_deterministic(H, [H|_]) :- !.
+member_deterministic(X, [H|_]):- !,
+    member_deterministic(X,H).
+member_deterministic(X, [_|T]):- 
+    member_deterministic(X,T).
+
+%4.
+replace(X,Y,[X|T],[Y|Rez]) :-
+    atomic(X), !,
+    replace(X,Y,T,Rez).
+replace(X,Y,[H|T],[Rez1|R]) :-
+    replace(X,Y,H,Rez1),
+    replace(X,Y,T,R), !.
+replace(X,Y,[H|T],[H|Rez]) :-
+    replace(X,Y,T,Rez).
+replace(_,_,[],[]).
+
+%5.
+lasts([H],[H]) :-
+    atomic(H), !.
+lasts([H|T],Rez) :-
+    atomic(H), !, 
+    lasts(T,Rez).
+lasts([H|T],Rez) :-
+    lasts(H,HLasts), 
+    lasts(T,TLasts), 
+    append(HLasts,TLasts,Rez).
+lasts([],[]).
+
+%6.
+depth([],1).
+depth([H|T],R):- atomic(H), !, depth(T,R).
+depth([H|T],R):- depth(H,R1), 
+    depth(T,R2), 
+    R3 is R1+1,
+    max(R3,R2,R).
+
+find_list_min_depth(H, H) :-
+    atomic(H), !.
+find_list_min_depth([H|T], Min) :-
+    depth(H, Depth),
+    find_list_min_depth(T, H, Depth, Min).
+find_list_min_depth([H|T], _, CurrMinDepth, Min) :-
+    atomic(H),
+    !,
+    find_list_min_depth(T, H, CurrMinDepth, Min).
+find_list_min_depth([H|T], _, CurrMinDepth, Min) :-
+    depth(H, H_Depth),
+    H_Depth < CurrMinDepth,
+    !,
+    find_list_min_depth(T, H, H_Depth, Min).
+find_list_min_depth([_|T], CurrMinList, CurrMinDepth, Min) :-
+    find_list_min_depth(T, CurrMinList, CurrMinDepth, Min).
+find_list_min_depth([], CurrMinList, _, CurrMinList).
+
+
+
+delete_first([Elem|T],Elem,T) :- !.
+delete_first([H|T],Elem,[H|Rez]):-
+    delete_first(T,Elem,Rez).
+
+sort_depth(L,[Min|Rez]) :-
+    find_list_min_depth(L,Min), 
+    delete_first(L,Min,LRez), 
+    sort_depth(LRez,Rez).
+sort_depth([],[]).
+
+%7.
+list_length([H|T],Len) :-
+    list_length(T,TLen), 
+    Len is TLen + 1.
+list_length([],0).
+    
+
+
+
+
+
+
+
+
+

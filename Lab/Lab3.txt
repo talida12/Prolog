@@ -1,0 +1,80 @@
+%1. Scrieți predicatul append3/4 care să realizeze concatenarea a 3 liste.
+%Sugestie: Nu folosiți append-ul a două liste.
+append([H|T], L2, L3, [H|R]) :- append(T, L2, L3, R).
+append([], [H|T], L3, [H|R]) :- append([], T, L3, R).
+append([],[],L3, L3).
+
+%2.Scrieți predicatul add_first(X,L,R) care adaugă X la începutul listei L și pune 
+%rezultatul în R.
+%Sugestie: simplificați pe cât de mult posibil acest predicat.
+add_first(X, L, [X|L]).
+
+%3.Scrieți un predicat care realizează suma elementelor dintr-o lista dată.
+%Sugestie: implementați folosind ambele tipuri de recursivitate, pentru cea 
+%înapoi încercați și varianta explicită si cea simplificată.
+
+%forward recursion
+sum_fwd(L, Rez) :- sum_fwd(L, 0, Rez).
+sum_fwd([], Rez, Rez).
+sum_fwd([H|T], Acc, Rez) :-
+    Acc_new is Acc + H, sum_fwd(T, Acc_new, Rez).
+
+%backward recursion 
+sum_bwd([H|T], Rez) :- 
+    sum_bwd(T, Rez1), Rez is H + Rez1.
+sum_bwd([], 0).
+
+%4. Scrieți un predicat care separă numerele pare de cele impare. (Întrebare: 
+%de ce avem nevoie pentru recursivitate înainte?)
+even_and_odd([H|T], [H|Even], Odd) :- 
+    H mod 2 =:= 0, !, even_and_odd(T, Even, Odd).
+even_and_odd([H|T], Even, [H|Odd]) :- even_and_odd(T, Even, Odd).
+even_and_odd([], [], []).
+
+%5. Scrieți un predicat care să șteargă toate elementele duplicate dintr-o listă.
+member(X, [X|_]).
+member(X, [_|T]) :- member(X, T).
+
+remove_duplicates([H|T], Rez) :-
+    member(H, T), !, remove_duplicates(T, Rez).
+remove_duplicates([H|T], [H|Rez]) :-
+    remove_duplicates(T, Rez).
+remove_duplicates([], []).
+
+%6. Scrieți un predicat care să înlocuiască toate aparițiile lui X în lista L cu Y și 
+%să pună rezultatul în R.
+replace(X, Y, [X|T], [Y|Rez]) :- !, replace(X, Y, T, Rez).
+replace(X, Y, [H|T], [H|Rez]) :- replace(X, Y, T, Rez).
+replace(_, _, [], []).
+
+%7. Scrieți un predicat care șterge tot al k-lea element din lista de intrare.
+drop_k(L, K, Rez) :- drop_k(L, 1, K, Rez).
+drop_k([_|T], K, K, Rez) :-
+    !,
+    drop_k(T, 1, K, Rez).
+drop_k([H|T], Count, K, [H|Rez]) :- 
+    CountNew is Count + 1,
+    drop_k(T, CountNew, K, Rez).
+drop_k([], _, _, []).
+
+%8. Scrieți un predicat care șterge duplicatele consecutive fără a modifica 
+%ordinea elementelor din listă.
+remove_consecutive_duplicates([H1, H2|T], [H1|Rez]) :- 
+    H1 \= H2, !,
+    remove_consecutive_duplicates([H2|T], Rez).
+remove_consecutive_duplicates([_|T], Rez) :- 
+    remove_consecutive_duplicates(T, Rez).
+remove_consecutive_duplicates([], []).
+
+%9. Scrieți un predicat care adăugă duplicatele consecutive într-o sub-listă 
+%fără a modifica ordinea elementelor din listă.
+pack_consecutive_duplicates([H1, H2|T], Rez) :- 
+    H1 \= H2, 
+   pack_consecutive_duplicates([H2|T], Rez).
+pack_consecutive_duplicates([H, H|T], [H, H|Rez]) :- 
+    pack_consecutive_duplicates([H|T], Rez).
+pack_consecutive_duplicates([], []).
+
+
+
+

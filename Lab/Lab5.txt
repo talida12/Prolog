@@ -1,0 +1,95 @@
+%1.
+find_max([H|T],Max):-find_max(T,H,Max).
+find_max([H|T],Max,Rez) :-
+    H > Max, !, find_max(T,H,Rez).
+find_max([_|T],Max,Rez):-find_max(T,Max,Rez).
+find_max([],Rez,Rez).
+
+delete_first_occurence([Elem|T],Elem,T) :- !.
+delete_first_occurence([H|T],Elem,[H|Rez]) :-
+    delete_first_occurence(T,Elem,Rez).
+
+sel_sort_max(L,[Max|Sorted]) :-
+    find_max(L, Max),
+    delete_first_occurence(L,Max,Rez), 
+    sel_sort_max(Rez, Sorted).
+sel_sort_max([],[]).
+%2.
+
+%3.
+bubble_sort_fixed(L,K,R):-bubble_sort_fixed(L,K,1,[],R).
+
+bubble_sort_fixed([H1,H2|T],K,Count,Rez,R) :-
+    Count =< K,
+    H2 > H1, !,
+    bubble_sort_fixed([H1|T],K,Count,[H2|Rez],R).
+bubble_sort_fixed([H1,H2|T],K,Count,Rez,R):-
+    Count =< K,
+    bubble_sort_fixed([H2|T],K,Count,[H1|Rez],R).
+bubble_sort_fixed([H],K,Count,Rez,R) :-
+    K \= Count, !, 
+    CountNew is Count + 1, 
+    append(Rez,[H],RezNew),
+    bubble_sort_fixed(RezNew,K,CountNew,[],R).
+bubble_sort_fixed([H],K,K,Inter,Result) :-
+    append(Inter,[H],Rez),
+    bubble_sort_fixed([],K,K,Rez,Result).
+bubble_sort_fixed([],K,K,Result,Result).
+
+%4.Scrieți un predicat care să sorteze o listă de caractere ASCII. (Puteți folosi 
+%o metodă de sortare la alegere).
+%Sugestie: folosiți predicatul predefinit char_code/
+sort_chars(L, [Min|Rez]) :-
+    find_min_char(L,Min),
+    delete_first_occurence(L,Min,L_Res), 
+    sort_chars(L_Res,Rez).
+sort_chars([],[]).
+
+find_min_char([H|T], Min) :- 
+    find_min_char(T, H, Min).
+find_min_char([H|T], MinCh, Min) :-
+    char_code(H,Ch1), 
+    char_code(MinCh,Ch2),
+    Ch1 < Ch2, !,
+    find_min_char(T, H, Min).
+find_min_char([_|T], MinCh, Min) :-
+    find_min_char(T, MinCh, Min).
+find_min_char([],Min,Min).
+
+%5.
+list_length([_|T], Rez) :-
+    list_length(T, TailLength), 
+    Rez is 1 + TailLength.
+list_length([],0).
+
+find_list_min_length([H|T],Min) :-
+    list_length(H,Len),
+    find_list_min_length(T,H,Len,Min).
+find_list_min_length([H|T],_,CurrMinLength,Min) :-
+    list_length(H,H_Length), 
+    H_Length < CurrMinLength, 
+    !, 
+	find_list_min_length(T,H,H_Length,Min).
+find_list_min_length([_|T],CurrMin,CurrMinLength,Min) :-
+    find_list_min_length(T,CurrMin,CurrMinLength,Min).
+find_list_min_length([],CurrMin, _, CurrMin).
+
+sort_lens(L, [LMin|Rez]) :-
+    find_list_min_length(L,LMin), 
+    delete_first_occurence(L,LMin,L_Res),
+    sort_lens(L_Res,Rez).
+sort_lens([],[]).
+
+
+perm1(L, [A|R]):- member(A, L), delete1(A, L, L1), perm1(L1, R).
+perm1([], []).
+
+delete1(X, [X|T], T) :- !.
+delete1(X, [H|T], [H|R]) :- delete1(X, T, R).
+delete1(_, [], []).
+
+
+
+
+
+

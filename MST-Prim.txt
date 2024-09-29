@@ -1,0 +1,43 @@
+% Define edges
+edge(0,1,4). edge(0,7,8). edge(1,7,11). edge(1,2,8).
+edge(2,3,7). edge(2,5,4). edge(2,8,2). edge(3,4,9).
+edge(3,5,14). edge(4,5,10). edge(5,6,2). edge(6,7,1).
+edge(6,8,6). edge(7,8,7).
+
+start_mst(0).
+:- dynamic mst_edge/3.
+:- dynamic in_mst/1.
+
+is_edge(X, Y, Cost) :- edge(X, Y, Cost); edge(Y, X, Cost).
+find_min_by_cost([(X, Y, Cost)|T], Min) :- 
+    find_min_by_cost(T,(X,Y,Cost), Min).
+find_min_by_cost([(X,Y,Cost)|T],(_,_,CurrentCost),Min) :- 
+    Cost < CurrentCost, !, 
+    find_min_by_cost(T, (X, Y, Cost), Min).
+find_min_by_cost([_|T],CurrentMin,Min) :- 
+    find_min_by_cost(T,CurrentMin,Min).
+find_min_by_cost([], Min, Min).
+
+prim_mst_helper :- 
+    start_mst(Start), 
+    assertz(in_mst(Start)), 
+    prim_mst.
+
+prim_mst :- 
+    findall((X,Y,Cost),condition(X,Y,Cost),Candidates),
+    Candidates \= [],
+    find_min_by_cost(Candidates,MinEdge),
+    MinEdge = (X,Y,Cost),
+    assertz(mst_edge(X,Y,Cost)), 
+    assertz(in_mst(X)), 
+    assertz(in_mst(Y)),
+    prim_mst.
+prim_mst.
+
+condition(X,Y,Cost) :- 
+    is_edge(X,Y,Cost), 
+    not(is_mst_edge(X,Y,Cost)),
+    (in_mst(X),not(in_mst(Y));
+     in_mst(Y),not(in_mst(X))).
+
+is_mst_edge(X, Y, Cost) :- mst_edge(X, Y, Cost); mst_edge(Y, X, Cost).

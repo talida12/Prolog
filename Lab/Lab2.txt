@@ -1,0 +1,103 @@
+%1. lcm = X*Y/cmmdc
+lcm(0,_,0).
+lcm(X,Y,Z) :- X>0, Product is X*Y, lcm(X,Y,Product,Z).
+lcm(X,0,Product,Z) :- Z is Product div X. 
+lcm(X,Y,Product,Z) :- Y > 0,
+    Rest is X mod Y, 
+    lcm(Y, Rest, Product, Z).
+
+%2.
+%forward recursion:
+power_fwd(1,_,1).
+power_fwd(0,_,0).
+power_fwd(_,0,1).
+power_fwd(N,P,Rez) :- power_fwd(N,P,1,Rez).
+power_fwd(_,0,Acc,Acc).
+power_fwd(N,P,Acc,Rez) :- 
+    P > 0,
+    P_new is P - 1, 
+    Acc_new is N * Acc,
+    power_fwd(N,P_new,Acc_new,Rez).
+
+%backward recursion:
+power_bwd(1,_,1).
+power_bwd(0,_,0).
+power_bwd(_,0,1).
+power_bwd(N,P,Rez) :- 
+    P > 0,
+    P_new is P - 1, 
+    power_bwd(N,P_new,Rez1), 
+    Rez is N*Rez1.
+
+%3. 
+fib2(0,0).
+fib2(1,1).
+fib2(N,Rez) :- 
+    N > 0, 
+    N1 is N - 1, N2 is N - 2, 
+    fib2(N1,Rez1), fib2(N2,Rez2),
+    Rez is Rez1 + Rez2.
+
+%4.
+fib1(0,0).
+fib1(1,1).
+fib1(N,Rez) :- fib1(N,_,Rez).
+fib1(1,0,1).
+fib1(N,Rez0,Rez1) :- 
+    N > 0, N_new is N - 1, 
+    fib1(N_new,R0,R1), 
+    Rez0 is R1, Rez1 is R0 + R1.
+
+%5. 
+triangle(A,B,C) :- 
+    A + B > C, A + C > B, B + C > A.
+
+%6.
+solve(A,B,C,X) :- 
+    Delta is B^2 - 4 * A * C, 
+    solve(A,B,C,Delta,X).
+solve(A,B,_,Delta,X) :- 
+    Delta = 0, 
+    Y is 2 * A, 
+    X is (-B/Y).
+solve(A,B,_,Delta,X) :- 
+    Delta > 0,
+    Y is 2 * A, 
+    Z is sqrt(Delta), 
+    X is (-B + Z)/Y.
+solve(A,B,_,Delta,X) :- 
+    Delta > 0,
+    Y is 2 * A, 
+    Z is sqrt(Delta), 
+    X is (-B - Z)/Y.
+%7.
+for(Inter,Inter,0).
+for(Inter,Out,In) :- 
+    In > 0, 
+    In_new is In - 1, 
+    Intermediate is Inter + In,
+    for(Intermediate,Out,In_new).
+%8.
+for_bwd(0,0).
+for_bwd(N,S) :- 
+    N > 0, 
+    N_new is N - 1,
+    for_bwd(N_new,PS),
+    S is PS + N.
+%9.
+while(Low,High,0) :- Low >= High.
+while(Low,High,Rez) :- 
+    Low < High, 
+    Low_new is Low + 1, 
+    while(Low_new, High, RP),
+    Rez is RP + Low.
+    
+%10.
+dowhile(Low,High,Res) :- dowhile(Low,High,0,Res).
+dowhile(Low,High,Acc,Rez) :-
+    Low < High,
+    Low_new is Low + 1, 
+    Acc_new is Low + Acc,
+    dowhile(Low_new,High,Acc_new,Rez).
+dowhile(Low,High,Acc,Acc) :- Low >= High.
+

@@ -1,0 +1,133 @@
+%1.
+member(X,[X|_]).
+member(X,[_|T]) :- member(X, T).
+
+intersect([H|T],L2,[H|Rez]) :-
+    member(H,L2), !, intersect(T,L2,Rez).
+intersect([_|T],L2,Rez) :- intersect(T,L2,Rez).
+intersect([],_,[]).
+
+%2.
+diff([H|T],L2,Rez) :- member(H,L2), !, 
+    diff(T,L2,Rez).
+diff([H|T],L2,[H|Rez]) :- diff(T,L2,Rez).
+diff([],_,[]).
+
+%3.
+find_minimum([H|T],Rez):-find_minimum(T,H,Rez).
+find_minimum([H|T],Min,Rez) :- H < Min, !, 
+    find_minimum(T,H,Rez).
+find_minimum([_|T],Min,Rez) :- find_minimum(T,Min,Rez).
+find_minimum([],Rez,Rez).
+
+find_maximum([H|T],Rez):-find_maximum(T,H,Rez).
+find_maximum([H|T],Max,Rez) :- H > Max, !, 
+    find_maximum(T,H,Rez).
+find_maximum([_|T],Max,Rez) :- find_maximum(T,Max,Rez).
+find_maximum([],Rez,Rez).
+
+del_min(L,Rez) :-
+    find_minimum(L,Min), del_min(L,Min,Rez).
+del_min([Min|T],Min,Rez) :- !, del_min(T,Min,Rez).
+del_min([H|T],Min,[H|Rez]):-del_min(T,Min,Rez).
+del_min([],_,[]).
+
+del_max(L,Rez) :-
+    find_maximum(L,Max), del_max(L,Max,Rez).
+del_max([Max|T],Max,Rez) :- !, del_max(T,Max,Rez).
+del_max([H|T],Max,[H|Rez]):-del_max(T,Max,Rez).
+del_max([],_,[]).
+
+%4.
+append([H|T],L2,[H|Rez]) :- append(T,L2,Rez).
+append([],L2,L2).
+
+reverse_k(L,K,Rez) :- reverse_k(L,K,0,[],[],Rez).
+reverse_k([H|T],K,Count,Acc1,Acc2,Rez) :- 
+    Count < K, 
+    !,
+    CountNew is Count + 1,
+    append(Acc1,[H],Acc1New),
+    reverse_k(T,K,CountNew,Acc1New,Acc2,Rez).
+reverse_k([H|T],K,Count,Acc1,Acc2,Rez) :-
+    CountNew is Count + 1,
+    Acc2New = [H|Acc2],
+    reverse_k(T,K,CountNew,Acc1,Acc2New,Rez).
+reverse_k([],_,_,Acc1,Acc2,Rez) :-
+    append(Acc1,Acc2,Rez).
+
+%5.
+rle_encode2([H|T], R) :- rle_encode2(T, H, 1, R).
+rle_encode2([H|T], H, Count, Acc) :- 
+    !, 
+    CountNew is Count + 1, 
+    rle_encode2(T,H, CountNew, Acc).
+rle_encode2([H|T], Nr, Count, Acc) :- 
+    rle_encode2(T, H, 1, Acc1), 
+    Acc = [[Nr,Count]|Acc1].
+rle_encode2([],Nr,Count,[[Nr,Count]]).
+
+%6.
+rotate_right(L,K,Rez):-
+    length1(L,ListLen),
+    List1Count is ListLen - K,
+    rotate_right(L,0,List1Count,[],[],Rez).
+rotate_right([H|T],Count,List1Count,Acc1,Acc2,Rez) :-
+    Count < List1Count, 
+    !,
+    CountNew is Count + 1,
+    append(Acc1,[H],Acc1New),
+    rotate_right(T,CountNew,List1Count,Acc1New,Acc2,Rez).
+rotate_right([H|T],Count,List1Count,Acc1,Acc2,Rez) :-
+    append(Acc2,[H],Acc2New),
+    rotate_right(T,Count,List1Count,Acc1,Acc2New,Rez).
+rotate_right([],_,_,Acc1,Acc2,Rez) :-
+    append(Acc2,Acc1,Rez).
+
+%7.
+rnd_select(L, K, Rez) :- rnd_select(L, K, 0, Rez).
+rnd_select(L, K, Count, [Elem|Rez]) :-
+    Count < K,
+    length1(L, Lng), 
+    MaxIndex is  Lng - 1,
+    random_between(0, MaxIndex, Index),
+   	find_elem_at_index(L,Index,Elem),
+    delete_elem_by_index(L,Index,NewList),
+    NewCount is Count + 1, 
+    rnd_select(NewList,K,NewCount,Rez).
+rnd_select(_, K, K, []).
+
+length1([_|T], Len):-
+    length1(T,LTail),
+    Len is LTail + 1.
+length1([], 0).
+
+find_elem_at_index(L, Index, Elem) :-
+    find_elem_at_index(L, 0, Index, Elem).
+find_elem_at_index([_|T],CurrentIdx,Index,Elem) :-
+    CurrentIdx \= Index, !, 
+    CurrentIdxNew is CurrentIdx + 1,
+    find_elem_at_index(T,CurrentIdxNew,Index,Elem).
+find_elem_at_index([H|_],Index,Index,H).
+
+delete_elem_by_index(L,Index,Rez) :-
+    delete_elem_by_index(L,0,Index,Rez).
+delete_elem_by_index([H|T],CurrentIdx,Index,[H|Rez]) :-
+    CurrentIdx < Index, !,
+    CurrentIdxNew is CurrentIdx + 1,
+    delete_elem_by_index(T,CurrentIdxNew,Index,Rez).
+delete_elem_by_index([_|T],Index,Index,T).
+
+
+%8.
+rle_decode([[Nr,Count] | T], [Nr|R]) :-
+    Count > 0, !,
+    CountNew is Count - 1,
+    rle_decode([[Nr,CountNew] | T], R).
+rle_decode([[_,0] | T], R) :-
+    rle_decode(T, R).
+rle_decode([], []).
+                  
+
+                  
+                  

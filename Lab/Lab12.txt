@@ -1,0 +1,299 @@
+%Pregatire colocviu
+%1. cmmdc
+cmmdc(X,X,X) :- !.
+cmmdc(X,Y,Z) :- X > Y,  
+    !,
+    Diff is X - Y, 
+    cmmdc(Diff,Y,Z).
+cmmdc(X,Y,Z) :- 
+    Diff is Y - X, 
+    cmmdc(X,Diff,Z).
+
+%2. cmmmc = X * Y / cmmmc
+cmmmc(0,_,0).
+cmmmc(X,Y,Rez) :- 
+    Product is X*Y, 
+    cmmmc(X,Y,Product,Rez).
+cmmmc(X,X,Product,Rez) :- 
+    Rez is Product div X, !.
+cmmmc(X,Y,Product,Rez) :-
+    X > Y, !, 
+    Diff is X - Y, 
+    cmmmc(Diff,Y,Product,Rez).
+cmmmc(X,Y,Product,Rez) :-
+    Diff is Y - X, 
+    cmmmc(X,Diff,Product,Rez).
+
+%3. Calculați divizorii unui număr natural.
+divisor(1,[1]).
+divisor(Nr,Divs) :- 
+    Half is Nr div 2,
+    End is Half + 1, 
+    divisor(Nr,2,End,[1],Divs).
+divisor(Nr,End,End,Acc,AccNew) :- !, append(Acc,[Nr],AccNew).
+divisor(Nr,Current,End,Acc,Divs) :-
+    0 is Nr mod Current, 
+    !,
+    CurrNew is Current + 1, 
+    append(Acc, [Current], AccNew), 
+    divisor(Nr,CurrNew,End,AccNew,Divs).
+divisor(Nr,Current,End,Acc,Divs) :-
+    CurrNew is Current + 1, 
+    divisor(Nr,CurrNew,End,Acc,Divs).
+
+%4. Convertiți un număr în binar (puterile lui 2 cresc de la dreapta la stânga)
+to_binary(Nr,BD) :- to_binary(Nr,[],BD).
+to_binary(0,Acc,Acc) :- !.
+to_binary(Nr,Acc,BD) :-
+    Q is Nr div 2, 
+    R is Nr mod 2, 
+    to_binary(Q,[R|Acc],BD).
+
+%5. Inversați un număr natural.
+reverse(Nr,Reversed) :- reverse(Nr,0,Reversed).
+reverse(0,Acc,Acc) :- !.
+reverse(Nr,Acc,Reversed) :-
+    Digit is Nr mod 10, 
+    NewNr is Nr div 10,
+    Rez1 is Acc*10, 
+    NewAcc is Rez1 + Digit,
+    reverse(NewNr,NewAcc,Reversed).
+
+
+%6.Calculați suma elementelor unei liste. 
+suma([],0).
+suma([H|T],Sum) :-
+    suma(T,PartialSum), 
+    Sum is H + PartialSum.
+
+%7. Dublați elementele impare și ridicați la pătrat cele pare.
+numbers([],[]).
+numbers([H|T],[Squared|Rez]) :- 
+    0 is H mod 2, !, 
+    Squared is H*H, 
+    numbers(T,Rez).
+numbers([H|T],[Double|Rez]) :-
+    Double is H*2, 
+    numbers(T,Rez).
+
+%8. Extrageți numerele pare în E și numerele impare în O.
+%Ex: ? – separate_parity([1,2,3,4,5,6], E, O). 
+separate_parity([],[],[]).
+separate_parity([H|T],[H|E],O) :-
+    0 is H mod 2, !, 
+    separate_parity(T,E,O).
+separate_parity([H|T],E,[H|O]) :-
+    separate_parity(T,E,O).
+    
+%9. Înlocuiți toate aparițiile lui X cu Y. 
+replace_all(_,_,[],[]).
+replace_all(X,Y,[X|T],[Y|R]) :-
+    !, replace_all(X,Y,T,R).
+replace_all(X,Y,[H|T],[H|R]) :-
+    replace_all(X,Y,T,R).
+
+%10.
+
+
+%11.
+delete_pos_even(List,Nr,R) :-
+    delete_pos_even(List,Nr,1,R).
+delete_pos_even([],_,_,[]).
+delete_pos_even([X|T],X,Pos,R) :-
+    0 is Pos mod 2, 
+    !,
+    NextPos is Pos+1, 
+    delete_pos_even(T,X,NextPos,R).
+delete_pos_even([X|T],X,Pos,[X|R]) :-
+    !,
+    NextPos is Pos+1, 
+    delete_pos_even(T,X,NextPos,R).
+delete_pos_even([H|T],X,Pos,[H|R]) :-
+    NextPos is Pos+1,
+    delete_pos_even(T,X,NextPos,R).
+
+%12.
+delete_kth(List,K,R) :- 
+    delete_kth(List,K,1,R).
+delete_kth([],_,_,[]).
+delete_kth([_|T],K,K,R) :- 
+    !,
+    delete_kth(T,K,1,R).
+delete_kth([H|T],K,Current,[H|R]) :-
+    Next is Current + 1,
+    delete_kth(T,K,Next,R).
+
+%14.
+find_min([H|T],Min) :-
+    find_min(T,H,Min).
+find_min([],Min,Min).
+find_min([H|T],CurrentMin,Min) :-
+    H < CurrentMin, !,
+    find_min(T,H,Min).
+find_min([_|T],CurrentMin,Min) :-
+    find_min(T,CurrentMin,Min).
+
+delete_min(List,Rez) :-
+    find_min(List,Min), 
+    delete_min(List,Min,Rez).
+delete_min([],_,[]).
+delete_min([H|T],H,Rez) :-
+    !, 
+    delete_min(T,H,Rez).
+delete_min([H|T],Min,[H|Rez]) :-
+    delete_min(T,Min,Rez).
+
+%15.
+delete_first([Elem|T],Elem,T) :- !.
+delete_first([H|T],Elem,[H|Rez]) :-
+    delete_first(T,Elem,Rez).
+
+sel_sort_min(L,[Min|Sorted]) :-
+    find_min(L,Min), 
+    delete_first(L,Min,Rez), 
+    sel_sort_min(Rez,Sorted).
+sel_sort_min([],[]).
+
+
+delete_duplicates(List,R) :-
+    sel_sort_min(List,[H|T]), 
+    delete_duplicates(T,H,Rez), 
+    R = [H|Rez].
+%pastram mereu dupa noi ultimu numar vizitat
+delete_duplicates([],_,[]).
+delete_duplicates([H|T],H,Rez) :-
+    !,
+    delete_duplicates(T,H,Rez). 
+delete_duplicates([H|T],_,[H|Rez]) :-
+    delete_duplicates(T,H,Rez).
+
+%16.
+reverse_list(List,Rez) :-
+    reverse_list(List,[],Rez).
+reverse_list([H|T],Acc,Rez) :-
+    reverse_list(T,[H|Acc],Rez).
+reverse_list([],Acc,Acc).
+
+%17.
+reverse_k(List,K,Rez) :-
+    reverse_k(List,0,K,Rez).
+reverse_k([],_,_,[]).
+reverse_k([H|T],Current,K,[H|Rez]) :-
+    Current < K, 
+    !, 
+    New is Current + 1, 
+    reverse_k(T,New,K,Rez).
+reverse_k(List,K,K,Rez) :-
+    inverse(List,Rez).
+
+inverse(List,Rez) :-
+    inverse(List,[],Rez).
+inverse([],Acc,Acc).
+inverse([H|T],Acc, Rez) :-
+    AccNew = [H|Acc],
+    inverse(T,AccNew,Rez).
+
+%18.
+rle_encode([H|T],Rez) :-
+    rle_encode(T,H,1,Rez).
+rle_encode([],X,Acc,[[X,Acc]]).
+rle_encode([H|T],H,Acc,Rez) :-
+    !,
+    AccNew is Acc + 1,
+    rle_encode(T,H,AccNew,Rez).
+rle_encode([H|T],X,Acc,[[X,Acc]|Rez]) :-
+    rle_encode(T,H,1,Rez).
+
+
+%19.
+rle_encode1([H|T],Rez) :-
+    rle_encode1(T,H,1,Rez).
+rle_encode1([],X,Acc,[(X,Acc)]) :-
+    Acc \= 1, 
+    !.
+rle_encode1([],X,_,[X]).
+rle_encode1([H|T],H,Acc,Rez) :- 
+    !,
+    AccNew is Acc + 1, 
+    rle_encode1(T,H,AccNew,Rez).
+rle_encode1([H|T],X,Acc,[(X,Acc)|Rez]) :-
+    Acc \= 1, 
+    !,
+    rle_encode1(T,H,1,Rez).
+rle_encode1([H|T],X,_,[X|Rez]) :-
+    rle_encode1(T,H,1,Rez).
+
+%20.
+rle_decode([],[]).
+rle_decode([[_,0]|T], Rez) :-
+    !,
+    rle_decode(T,Rez).
+rle_decode([[H,Nr]|T], [H|Rez]) :-
+    NrNew is Nr - 1, 
+    rle_decode([[H,NrNew]|T],Rez).
+%21.
+rotate_k(List,K,Rez) :-
+    length(List,Len),
+    rotate_k(List,Len,K,Rez).
+rotate_k([H|T],Acc,K,[H|Rez]) :-
+    Acc > K, 
+    !, 
+    AccNew is Acc-1,
+    rotate_k(T,AccNew,K,Rez).
+rotate_k(List,K,K,Reversed) :-
+    reverse_list(List,Reversed).
+
+%22.
+find_min_char([H|T],Min) :-
+    char_code(H,CH), 
+    find_min_char(T,H,CH,Min).
+find_min_char([],CurrentMin,_,CurrentMin).
+find_min_char([H|T],_,MinCode,Min) :-
+    char_code(H,CH), 
+    CH < MinCode, 
+    !, 
+    find_min_char(T,H,CH,Min).
+find_min_char([_|T],CurrentMin,MinCode,Min) :-
+    find_min_char(T,CurrentMin,MinCode,Min).
+    
+sort_chars(List,[Min|Rez]) :-
+    find_min_char(List,Min), 
+    delete_first(List,Min,Partial), 
+    sort_chars(Partial,Rez).
+sort_chars([],[]).
+
+%23.
+find_list_min([H|T],Min) :-
+    length(H,Len),
+    find_list_min(T,H,Len,Min).
+find_list_min([],CurrentMin,_,CurrentMin).
+find_list_min([H|T],_,MinLen,Min) :-
+    length(H,Len), 
+    Len < MinLen, !, 
+    find_list_min(T,H,Len,Min).
+find_list_min([_|T],CurrentMin,MinLen,Min) :-
+    find_list_min(T,CurrentMin,MinLen,Min).
+
+sort_len(List,[Min|Rez]) :-
+    find_list_min(List,Min), 
+    delete_first(List,Min,Partial), 
+    sort_len(Partial,Rez).
+sort_len([],[]).
+
+
+%24.
+remove_dup_on_odd_pos(List,Rez) :-
+    remove_dup_on_odd_pos(List,List,1,Rez).
+remove_dup_on_odd_pos([],_,_,[]).
+remove_dup_on_odd_pos([H|T],List,Idx,Rez) :-
+    delete_first(List,H,P), 
+    member(H,P), 
+    1 is Idx mod 2, 
+    !,
+    IdxNew is Idx+1,
+    remove_dup_on_odd_pos(T,List,IdxNew,Rez).
+remove_dup_on_odd_pos([H|T],List,Idx,[H|Rez]) :-
+    IdxNew is Idx+1, 
+    remove_dup_on_odd_pos(T,List,IdxNew,Rez).
+
+

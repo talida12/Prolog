@@ -1,0 +1,36 @@
+%finding all the connected components
+:- dynamic visited/1.
+:- dynamic connected_component/2.
+:- dynamic label/2.
+:- dynamic current_label/1.
+
+edge(1,2). edge(1,3). edge(2,3). edge(3,4). edge(5,6). 
+edge(6,7). edge(5,7). is_edge(8,9). 
+is_edge(X,Y) :- edge(X,Y); edge(Y,X).
+current_label(1).
+
+%etichetez fiecare nod cu componenta conexa din care face parte(?) alta idee n am 
+df_search(X,Label) :- 
+    assertz(visited(X)),
+    assertz(label(X,Label)),
+    is_edge(X,Y), 
+    not(visited(Y)), 
+    df_search(Y,Label).
+df_search(_,Label) :- 
+    findall(X,condition(X,Label),L), 
+    not(connected_component(L,Label)),
+    assertz(connected_component(L,Label)).
+
+condition(X,Label) :- visited(X), label(X,Label).
+
+find_all_connected_components :- 
+    is_edge(X,_), 
+    not(visited(X)), 
+    current_label(Label),
+    df_search(X,Label),
+    retract(current_label(CurrentLabel)), 
+    NewLabel is CurrentLabel+1, 
+    assert(current_label(NewLabel)),
+    %prima componenta are label 1,la fiecare dfs nou se actualizeaza labelu 
+    fail.
+find_all_connected_components.

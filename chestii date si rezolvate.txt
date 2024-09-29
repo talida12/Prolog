@@ -1,0 +1,342 @@
+%subiecte 6-8
+%pune mereu primu element la final (ii dau append) 
+transform_it([H|T],Rez) :- 
+    transform_deep([H|T],RezP), 
+    append(RezP,[H],Rez).
+
+transform_deep([],[]).
+transform_deep([H|T],[H|Rez]) :- 
+    atomic(H), !, 
+    transform_deep(T,Rez).
+transform_deep([H|T],[RezH|RezT]) :- 
+    H=[First|_],
+    transform_deep(H,RezHP), 
+    append(RezHP,[First],RezH), 
+    transform_deep(T,RezT).
+
+replace_char([],[]).
+replace_char([H|T],[CH|Rez]) :- 
+    atomic(H), !,
+    char_code(H,CH), 
+    replace_char(T,Rez).
+replace_char([H|T],[RezH|RezT]) :- 
+    replace_char(H,RezH), 
+    replace_char(T,RezT).
+    
+%insert 0 when entering a list, insert -1 when exiting a list
+deep_into_the_list([],[]).
+deep_into_the_list([H|T],[H|Rez]) :- 
+    atomic(H), !,
+    deep_into_the_list(T,Rez).
+deep_into_the_list([H|T],Rez) :- 
+    deep_into_the_list(H,RezH),
+    deep_into_the_list(T,RezT),
+    append([0|RezH],[-1|RezT],Rez).
+
+
+%value of the node with one child with the sum of the leaves
+%of the subtree rooted by that node
+tree_ex2(t(1,t(2,nil,t(3,nil,nil)),t(4,nil,t(5,t(6,nil,nil),t(7,nil,t(10,nil,nil)))))).
+replace_singular(Tree,Rez) :- 
+    replace_singular(Tree,_,Rez).
+replace_singular(nil,_,nil).
+replace_singular(t(K,nil,nil),K,t(K,nil,nil)) :- !.
+replace_singular(t(_,nil,R),SumR,t(SumR,nil,NR)) :- !,
+    replace_singular(R,SumR,NR).
+replace_singular(t(_,L,nil),SumL,t(SumL,NL,nil)) :- !,
+    replace_singular(L,SumL,NL).
+replace_singular(t(K,L,R),Sum,t(K,NL,NR)) :- 
+    replace_singular(L,SumL,NL), 
+    replace_singular(R,SumR,NR), 
+    Sum is SumL+SumR.
+
+
+%maximum vaue for incomplete tree values
+tree_it(t(3,t(6,t(3,_,_),t(5,_,_)),t(2,t(1,_,_),_))).
+max2(A,B,A) :- A >= B, !.
+max2(_,B,B).
+
+max_it(t(K,L,R),K) :- 
+    var(L), var(R), !.
+max_it(t(K,L,R),Max) :- 
+    var(L), !, 
+    max_it(R,MaxR), 
+    max2(MaxR,K,Max).
+max_it(t(K,L,R),Max) :- 
+    var(R), !, 
+    max_it(L,MaxL), 
+    max2(MaxL,K,Max).
+max_it(t(K,L,R),Max) :- 
+    max_it(L,MaxL), max_it(R,MaxR), 
+    max2(MaxL,MaxR,MaxP), 
+    max2(MaxP,K,Max).
+
+
+%Modelu de la Elena
+%al doilea arg e first,ultimu arg e last
+find_first_last([H|T],H,Last) :- 
+    find_last(T,Last).
+find_last([Last],Last) :- !.
+find_last([_|T],Last) :- 
+    find_last(T,Last).
+
+some_wrapper(F,L,SumP,Sum) :- 
+    atomic(F), 
+    atomic(L), !, 
+    SumPP is F+L, 
+    Sum is SumP+SumPP.
+some_wrapper(F,_,SumP,Sum) :-
+    atomic(F), !, 
+    Sum is SumP+F.
+some_wrapper(_,L,SumP,Sum) :- 
+    atomic(L), !, 
+    Sum is SumP+L.
+some_wrapper(_,_,Sum,Sum).
+
+%iau separat primu si ultimu elem pt lista initiala ca in recursivitate nu le ia 
+sum_fl(List,Sum) :- 
+    find_first_last(List,F,L), 
+    sum_fl2(List,SumP), 
+    some_wrapper(F,L,SumP,Sum).
+
+sum_fl2([H|T],Sum) :- 
+    atomic(H), !, 
+    sum_fl2(T,Sum).
+sum_fl2([H|T],Sum) :- 
+    find_first_last(H,FH,LH),  
+    sum_fl2(T,SumT), 
+    some_wrapper(FH,LH,SumT,Sum).
+sum_fl2([],0).
+
+tree_swap(t(16,t(10,t(7,t(1,_,_),_),t(6,t(8,_,_),_)),t(4,_,t(12,_,t(3,_,_))))).
+swap_nodes(Tree,Rez) :- 
+    swap_nodes(Tree,1,Rez). 
+%daca e frunza, ramane la fel 
+swap_nodes(t(K,L,R),_,t(K,nil,nil)) :- 
+    var(L), var(R), !.
+swap_nodes(t(K,L,R),CurrentDepth,t(K,NR,nil)) :- 
+    var(L), 0 is CurrentDepth mod 2, !, 
+    %interschimb
+    NextDepth is CurrentDepth+1, 
+    swap_nodes(R,NextDepth,NR).
+swap_nodes(t(K,L,R),CurrentDepth,t(K,nil,NR)) :- 
+    var(L), !, 
+    NextDepth is CurrentDepth+1, 
+    swap_nodes(R,NextDepth,NR).
+swap_nodes(t(K,L,R),CurrentDepth,t(K,nil,NL)) :- 
+    var(R), 0 is CurrentDepth mod 2, !,
+    %interschimb
+    NextDepth is CurrentDepth+1, 
+    swap_nodes(L,NextDepth,NL).
+swap_nodes(t(K,L,R),CurrentDepth,t(K,NL,nil)) :- 
+    var(R), !, 
+    NextDepth is CurrentDepth+1, 
+    swap_nodes(L,NextDepth,NL).
+swap_nodes(t(K,L,R),CurrentDepth,t(K,NR,NL)) :- 
+    0 is CurrentDepth mod 2, !,
+    NextDepth is CurrentDepth+1, 
+    swap_nodes(L,NextDepth,NL), 
+    swap_nodes(R,NextDepth,NR).
+swap_nodes(t(K,L,R),CurrentDepth,t(K,NL,NR)) :- 
+    NextDepth is CurrentDepth+1, 
+    swap_nodes(L,NextDepth,NL), 
+    swap_nodes(R,NextDepth,NR).
+
+%de colectat nodurile care adu adancimea=inaltimea
+%adancime radacina=1, inaltime frunza=1
+tree_collect(t(1,t(2,nil,t(3,nil,nil)),t(4,nil,t(5,t(6,nil,nil),t(7,nil,t(10,nil,nil)))))).
+collect_nodes(T,L,E) :- collect_nodes(T,_,1,L,E).
+collect_nodes(t(_,nil,nil),1,_,L,L).
+collect_nodes(t(K,nil,R),Height,Depth,[K|LS],LE) :- 
+	DepthNew is Depth+1, 
+    collect_nodes(R,HeightR,DepthNew,LS,LE),
+    Height is HeightR+1, 
+    Height =:= Depth, !.
+collect_nodes(t(_,nil,R),Height,Depth,LS,LE) :- 
+	DepthNew is Depth+1, 
+    collect_nodes(R,HeightR,DepthNew,LS,LE),
+    Height is HeightR+1.
+collect_nodes(t(K,L,nil),Height,Depth,[K|LS],LE) :- 
+	DepthNew is Depth+1, 
+    collect_nodes(L,HeightL,DepthNew,LS,LE),
+    Height is HeightL+1, 
+    Height =:= Depth, !.
+collect_nodes(t(_,L,nil),Height,Depth,LS,LE) :- 
+	DepthNew is Depth+1, 
+    collect_nodes(L,HeightL,DepthNew,LS,LE),
+    Height is HeightL+1.
+collect_nodes(t(K,L,R),Height,Depth,[K|LS],LE) :- 
+	DepthNew is Depth+1, 
+    collect_nodes(L,HeightL,DepthNew,LS,Interm), 
+    collect_nodes(R,HeightR,DepthNew,Interm,LE),
+    max2(HeightL,HeightR,HeightP), 
+    Height is HeightP+1, 
+    Height =:= Depth, !.
+collect_nodes(t(_,L,R),Height,Depth,LS,LE) :- 
+	DepthNew is Depth+1, 
+    collect_nodes(L,HeightL,DepthNew,LS,Interm), 
+    collect_nodes(R,HeightR,DepthNew,Interm,LE),
+    max2(HeightL,HeightR,HeightP), 
+    Height is HeightP+1.
+
+%collect all nr from even depths in a deep incomplete list inside a shallow difference list
+collect_even_depth(List,S,E) :- 
+    collect_even_depth(List,1,S,E).
+collect_even_depth(L,_,S,S) :- var(L), !.
+collect_even_depth([H|T],Depth,[H|LS],LE) :- 
+    atomic(H),
+    0 is Depth mod 2, !, 
+    collect_even_depth(T,Depth,LS,LE).
+collect_even_depth([H|T],Depth,LS,LE) :- 
+    atomic(H), !, 
+    collect_even_depth(T,Depth,LS,LE).
+collect_even_depth([H|T],Depth,LS,LE) :- 
+    DepthNew is Depth+1, 
+    collect_even_depth(H,DepthNew,LS,Interm), 
+    collect_even_depth(T,Depth,Interm,LE).
+
+%extend tree- extends the tree recursively, creating for each leaf node two children with the values equal 
+%to half of the parent. The process is repeated until the value of the leaves is 1.
+tree_ext(t(16,t(10,t(3,nil,nil),t(7,nil,nil)),nil)).
+extend_tree(t(1,nil,nil),t(1,nil,nil)).
+extend_tree(t(K,nil,nil),t(K,NLN,NRN)) :- 
+    NewK is K div 2, 
+    NL=t(NewK,nil,nil), 
+    NR=NL,
+    extend_tree(NL,NLN),
+    extend_tree(NR,NRN).
+extend_tree(t(K,L,nil),t(K,NL,nil))  :- 
+    extend_tree(L,NL).
+extend_tree(t(K,nil,R),t(K,nil,NR)) :- 
+    extend_tree(R,NR).
+extend_tree(t(K,L,R),t(K,NL,NR)) :- 
+    extend_tree(L,NL), 
+    extend_tree(R,NR).
+
+
+%colecteaza atomii si returneaza lista cu doar cu ei si lista fara ei 
+collect_atomics([H|T],[H|RezA],RezL) :- 
+    atomic(H), !,
+    collect_atomics(T,RezA,RezL).
+collect_atomics([H|T],RezA,[H|RezL]) :- 
+    collect_atomics(T,RezA,RezL).
+collect_atomics([],[],[]).
+
+%apel separat pentru lista ca intreg
+group(List,Rez) :-
+    collect_atomics(List,Atomics,Lists), 
+    group2(Lists,RezP), 
+    append(Atomics,RezP,Rez).
+
+group2([],[]).
+group2([H|T],[RezH|RezT]) :- 
+    not(atomic(H)), !,
+    collect_atomics(H,AtomicsH,ListsH), 
+    append(AtomicsH,ListsH,RezH),
+    group2(T,RezT).
+group2([_|T],RezT) :- group2(T,RezT).
+
+
+%pb2 - split the tree into subtree by removing the nodes with value -1 
+% result should be gathered in a DL
+
+%plimb dupa mn si arborele rezultat 
+tree1(t(16,t(10,t(7,t(1,nil,nil),nil),t(-1,t(8,nil,nil),t(3,nil,nil))),t(4,nil,t(-1,nil,nil)))).
+split(nil,nil,[]).
+split(t(-1,nil,nil),nil,[]) :- !.
+split(t(-1,L,R),nil,Rez) :- !,
+    append([L],[R],Rez).
+split(t(K,L,R),t(K,NL,NR),Rez) :- 
+    split(L,NL,RezL), 
+    split(R,NR,RezR), 
+    append(RezL,RezR,RezP),
+    append([t(K,NL,NR)],RezP,Rez).
+   
+
+%swap first and last element
+find_first_last([H|T],H,Last,Rez) :- 
+    find_last(T,Last,Rez).
+find_last([Last],Last,[]) :- !.
+find_last([H|T],Last,[H|Rez]) :- 
+    find_last(T,Last,Rez).
+
+swap_them(List,Rez) :- 
+    find_first_last(List,F,L,RezP),
+    swap_them_all(RezP,RezPP), 
+    append([L|RezPP],[F],Rez).
+
+swap_them_all([],[]).
+swap_them_all([H|T],[H|RezT]) :- 
+    atomic(H), !,
+    swap_them_all(T,RezT).
+swap_them_all([H|T],[RezH|RezT]) :- 
+    find_first_last(H,FH,LH,RezHP), 
+    swap_them_all(RezHP,RezHPP), 
+    append([LH|RezHPP],[FH],RezH), 
+    swap_them_all(T,RezT).
+
+
+%nodes representing mountain tops - greater than all its 
+%descendants on the left-most and right-most branch 
+tree_top(t(16,t(10,t(7,t(1,nil,nil),nil),t(6,t(8,nil,nil),t(3,nil,nil))),t(4,nil,t(12,nil,nil)))).
+go_further_on_the_left(K,t(Key,L,_)) :- 
+    K > Key, 
+    go_further_on_the_left(K,L).
+go_further_on_the_left(_,nil).
+
+go_further_on_the_right(K,t(Key,_,R)) :- 
+    K > Key, 
+    go_further_on_the_right(K,R).
+go_further_on_the_right(_,nil).
+
+top_nodes(nil,[]) :- !.
+top_nodes(t(K,nil,nil),[K]) :- !.
+top_nodes(t(K,L,R),[K|Rez]) :- 
+    go_further_on_the_left(K,L), 
+    go_further_on_the_right(K,R), !, 
+    top_nodes(L,NodesL), 
+    top_nodes(R,NodesR), 
+    append(NodesL,NodesR,Rez).
+top_nodes(t(_,L,R),Rez) :- 
+    top_nodes(L,NodesL), 
+    top_nodes(R,NodesR), 
+    append(NodesL,NodesR,Rez).
+
+%collect all nodes from even depths 
+collect_even_depths(List,Rez) :- 
+    collect_even_depths(List,1,Rez).
+collect_even_depths([],_,[]) :- !.
+collect_even_depths([H|T],Depth,[H|Rez]) :- 
+    atomic(H), 
+    0 is Depth mod 2, !, 
+    collect_even_depths(T,Depth,Rez).
+collect_even_depths([H|T],Depth,Rez) :- 
+    atomic(H), !,
+    collect_even_depths(T,Depth,Rez).
+collect_even_depths([H|T],Depth,Rez) :- 
+    %intram in lista=>adancimea creste 
+    DepthNew is Depth+1, 
+    collect_even_depths(H,DepthNew,RezH), 
+    collect_even_depths(T,Depth,RezT), 
+    append(RezH,RezT,Rez).
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,89 @@
+%LAB9
+add_dl(X, LS, LE, RS, RE):- RS = LS, LE = [X|RE].
+append_dl(LS1,LE1, LS2,LE2, RS,RE):- RS=LS1, LE1=LS2, RE=LE2.
+
+complete_tree(t(6, t(4,t(2,nil,nil),t(5,nil,nil)), t(9,t(7,nil,nil),nil))).
+incomplete_tree(t(6, t(4,t(2,_,_),t(5,_,_)), t(9,t(7,_,_),_))).
+
+%1
+convertCL2DL([],DL,DL).
+convertCL2DL([H|T],[H|LS], LE) :-
+    convertCL2DL(T,LS,LE).
+
+%varianta curs
+convertDL2CL(LS,LE,[]) :-
+    LS == LE, !.
+convertDL2CL([H|LS],LE,[H|R]) :-
+    convertDL2CL(LS,LE,R).
+
+%2
+%convertCL2DL([],DL,DL).
+convertIL2DL(L,DL,DL) :-
+    var(L), !.
+convertIL2DL([H|T],[H|LS], LE) :-
+    convertIL2DL(T,LS,LE).
+
+%convertDL2CL(LS,LE,[]) :- LS == LE, !.
+convertDL2IL(LS, LE, L) :-
+    LS == LE, var(L), !.
+convertDL2IL([H|LS],LE,[H|R]) :-
+    convertDL2IL(LS,LE,R).
+
+%3
+flat_dl([],L,L).
+flat_dl([H|T], [H|LS], LE) :-
+    atomic(H), !, 
+    flat_dl(T, LS, LE).
+flat_dl([H|T],LHS,LTE) :-
+    flat_dl(H,LHS,LHE), 
+    flat_dl(T,LHE,LTE).
+    
+%5
+preorder_dl(nil,List,List).
+preorder_dl(t(Key,L,R),[Key|LLS],LRE) :-
+    preorder_dl(L,LLS,LLE),
+    preorder_dl(R,LLE,LRE).
+
+postorder_dl(nil,List,List).
+postorder_dl(t(Key,L,R),LLS,LRE) :-
+    postorder_dl(L,LLS,LLE), 
+    postorder_dl(R,LLE,[Key|LRE]).
+
+%6
+even_dl(nil,List,List).
+even_dl(t(Key,L,R),LLS,[Key|LRE]) :-
+    0 is Key mod 2, 
+    !,
+    even_dl(L,LLS,LLE), 
+    even_dl(R,LLE,LRE).
+even_dl(t(_,L,R),LLS,LRE) :-
+    even_dl(L,LLS,LLE),
+    even_dl(R,LLE,LRE).
+
+%7
+%between_dl(nil,List,List,_,_).
+between_dl(V,List,List,_,_) :-
+    var(V),
+    !.
+between_dl(t(Key,L,R),LLS,[Key|LRE],K1,K2) :-
+    Key > K1, Key < K2, !, 
+    between_dl(L,LLS,LLE,K1,K2), 
+    between_dl(R,LLE,LRE,K1,K2).
+between_dl(t(_,L,R),LLS,LRE,K1,K2) :-
+    between_dl(L,LLS,LLE,K1,K2), 
+    between_dl(R,LLE,LRE,K1,K2).
+
+%8
+collect_depth_k(t(Key,L,R),K,S,E) :-
+    collect_depth_k(t(Key,L,R),K,1,S,E).
+collect_depth_k(t(Key,_,_),K,K,[Key|LS],LS).
+collect_depth_k(t(_,L,R),K,CurrentK,LLS,LRE) :-
+    NextK is CurrentK + 1, 
+    NextK =< K, 
+    !, 
+ 	collect_depth_k(L,K,NextK,LLS,LLE), 
+    collect_depth_k(R,K,NextK,LLE,LRE).
+
+
+
+

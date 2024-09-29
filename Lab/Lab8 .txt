@@ -1,0 +1,111 @@
+incomplete_tree(t(7, t(5, t(3, _, _), t(6, _, _)), t(11, _, _))).
+complete_tree(t(7, t(5, t(3, nil, nil), t(6, nil, nil)), t(11, nil, nil))).
+
+%Ex2
+append_il(L1,L2,L2) :- var(L1), !.
+append_il([H|T],L2,[H|R]) :-
+    append_il(T, L2, R).
+
+%Ex1.
+convertIL2CL(L,R) :-
+    var(L), append_il(L,[],R), !.
+convertIL2CL([H|T],[H|R]) :-
+    convertIL2CL(T,R).
+
+convertCL2IL([H|T],[H|R]) :-
+    convertCL2IL(T,R), !.
+convertCL2IL([H|_],[H|_]).
+
+%Ex3
+reverse_il_bwd(L,_) :- var(L), !.
+reverse_il_bwd([H|T], R) :-
+    reverse_il_bwd(T, RP), 
+    append_il(RP, [H|_], R).
+
+reverse_il_fwd(L,R) :-
+    reverse_il_fwd(L,[],R).
+reverse_il_fwd(L,Acc,Acc) :-
+    var(L), !.
+reverse_il_fwd([H|T],Acc,R) :-
+    reverse_il_fwd(T,[H|Acc],R).
+
+
+%Ex4
+insert_il2(X, [X|_]):-!. 
+insert_il2(X, [_|T]):- insert_il2(X, T).
+
+flat_il(L,_) :- var(L), !.
+flat_il([H|T],R) :-
+    atomic(H), !, 
+    insert_il2(H,R),
+    flat_il(T, R).
+flat_il([H|T],R) :-
+    flat_il(H,R), 
+    flat_il(T,R).
+
+%Ex5
+convertIT2CT(V, nil) :- var(V), !.
+convertIT2CT(t(K,L,R), t(K,NL,NR)) :-
+    convertIT2CT(L,NL), 
+    convertIT2CT(R,NR).
+
+convertCT2IT(nil, _).
+convertCT2IT(t(K,L,R), t(K,NL,NR)) :- 
+    convertCT2IT(L,NL), 
+    convertCT2IT(R,NR).
+
+%Ex6
+preorder_it(V, _) :-
+    var(V), !.
+preorder_it(t(K,L,R),Rez) :-
+    preorder_it(L,LL), 
+    preorder_it(R,LR), 
+    append_il([K|LL],LR,Rez).
+
+%Ex7
+height_it(V,0) :- var(V), !.
+height_it(t(_,L,R), Height) :- 
+    height_it(L, HL), 
+    height_it(R, HR), 
+    max2(HL,HR,Max), 
+    Height is Max + 1.
+
+max2(A,B,A) :- A >= B, !.
+max2(_,B,B).
+
+%Ex8 
+diam_it(V,0) :- var(V), !.
+diam_it(t(_,L,R), Diam) :-
+    diam_it(L, DL),
+    diam_it(R, DR), 
+    height_it(L, HL), 
+    height_it(R, HR), 
+    Sum is HL + HR +1, 
+    max3(DL, DR, Sum, Diam).
+
+max3(A,B,C,A) :- A >= B, A >=C, !.
+max3(A,B,C,B) :- B >= A, B >= C, !.
+max3(_,_,C,C).
+
+%Ex9 
+subl_il(A, B) :-
+    convertIL2CL(A, X), 
+    convertIL2CL(B, Y),
+    is_subset(X, Y).
+
+is_subset(A,B) :- 
+    is_prefix(A,B), !.
+is_subset(A,[_|T]) :- is_subset(A, T).
+
+is_prefix([H|T1],[H|T2]) :- 
+    is_prefix(T1,T2).
+is_prefix([],_).
+
+
+
+
+
+
+
+
+

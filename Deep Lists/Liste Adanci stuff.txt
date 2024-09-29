@@ -1,0 +1,62 @@
+%merge pe liste adanci 
+merge_them([],L2,L2) :- !.
+merge_them(L1,[],L1) :- !.
+merge_them([H1|T1],[H2|T2],[H1|Rez]) :- 
+    H1<H2, !, 
+    merge_them(T1,[H2|T2],H1,Rez).
+merge_them([H1|T1],[H2|T2],[H2|Rez]) :- 
+    merge_them([H1|T1],T2,H2,Rez).
+%tin mereu ultimu element merge-uit ca sa nu pun duplicate 
+
+merge_them([Last|T1],[H2|T2],Last,Rez) :- 
+    Last<H2, !, 
+    merge_them(T1,[H2|T2],Last,Rez).
+merge_them([H1|T1],[H2|T2],_,[H1|Rez]) :-
+    H1<H2, !,
+    merge_them(T1,[H2|T2],H1,Rez).
+merge_them([H1|T1],[Last|T2],Last,Rez) :- 
+    Last<H1, !,
+	merge_them([H1|T1],T2,Last,Rez).
+merge_them([H1|T1],[H2|T2],_,[H2|Rez]) :-
+    !,
+    merge_them([H1|T1],T2,H2,Rez).
+merge_them(L1,[],_,L1).
+merge_them([],L2,_,L2).
+
+merge_them_all(List,Rez) :- 
+    merge_them_all(List,[],Rez).
+merge_them_all([],Acc,Acc).
+merge_them_all([H|T],Acc,Rez) :- 
+    atomic(H), !, 
+    merge_them_all(T,Acc,Rez). 
+merge_them_all([H|T],Acc,Rez) :- 
+    merge_them(H,Acc,AccNew), 
+    merge_them_all(T,AccNew,Rez).
+
+%replace_max_pos-bwd recursion
+replace_max_pos([H|T],Rez) :- 
+    replace_max_pos([H|T],1,_,Rez).
+replace_max_pos([X],Pos,X,[Pos]) :- !.
+replace_max_pos([H|T],Pos,H,[Pos]) :- 
+    PosNew is Pos+1,
+    replace_max_pos(T,PosNew,MaxT,_), 
+    H > MaxT, !.
+replace_max_pos([H|T],Pos,H,[Pos|RezT]) :-
+    PosNew is Pos+1, 
+    replace_max_pos(T,PosNew,H,RezT), !.
+    %daca s egale, adaug si poz asta in lista.
+replace_max_pos([_|T],Pos,MaxT,RezT) :- 
+    PosNew is Pos+1, 
+    replace_max_pos(T,PosNew,MaxT,RezT).
+
+replace_max_pos_all([],[]).
+replace_max_pos_all([H|T],[H|Rez]) :- 
+    atomic(H), !, 
+    replace_max_pos_all(T,Rez).
+replace_max_pos_all([H|T],[RezH|RezT]) :- 
+    replace_max_pos(H,RezH), 
+    replace_max_pos_all(T,RezT).
+
+
+
+

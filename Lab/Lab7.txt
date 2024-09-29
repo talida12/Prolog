@@ -1,0 +1,119 @@
+ternary_inorder(t(K,L,M,R), List) :-
+    ternary_inorder(L, LL),
+    ternary_inorder(M, LM),
+    ternary_inorder(R, LR),
+    append(LL, [K|LM], Temp),  
+    append(Temp, LR, List).    
+ternary_inorder(nil, []).      
+
+%root, left, middle, right
+ternary_preorder(t(K,L,M,R),List) :-
+	ternary_preorder(L,LL), 
+    ternary_preorder(M,LM),
+    ternary_preorder(R,LR), 
+    append([K|LL],LM,Rez1), 
+    append(Rez1,LR,List).
+ternary_preorder(nil, []).
+
+%left, middle, right, root
+ternary_postorder(t(K,L,M,R),List) :-
+    ternary_postorder(L,LL),
+    ternary_postorder(M,LM),
+    ternary_postorder(R,LR),
+    append(LL,LM,Rez1),
+    append(Rez1,LR,Rez2),
+    append(Rez2,[K],List).
+ternary_postorder(nil,[]).
+
+pretty_print(T) :- pretty_print(T,0).
+pretty_print(nil, _).
+pretty_print(t(K,L,R), D):-
+D1 is D+1,
+pretty_print(L, D1), 
+print_key(K, D), 
+pretty_print(R, D1).
+
+print_key(K, D):-D>0, !, D1 is D-1, tab(8), print_key(K, D1).
+print_key(K, _):-write(K), nl.
+
+
+ternary_tree(
+    t(5,  
+        t(3,  
+            t(1, nil, nil, nil),  
+            t(4, nil, nil, nil),
+          	t(5, nil, nil, nil)),
+        t(2,  
+            t(1, nil, nil, nil),  
+            t(4, nil, nil, nil),
+          	t(9, nil, nil, nil)),  
+        t(9,  
+            t(1, nil, nil, nil),  
+            t(4, nil, nil, nil) ,
+          	t(4, nil, nil, nil))
+    )
+).
+
+%Lab 7 - ex 3 - inaltime arbore ternar
+height3(nil,0).
+height3(t(_,M,L,R), H) :-
+    height(L, H1), 
+    height(R, H2), 
+    height(M, H3), 
+    max3(H1, H2, H3, HP), 
+    H is HP + 1.
+
+max3(A,B,C,A) :- A >= B, 
+    A >= C, !.
+max3(A,B,C,B) :- B >= A, 
+    B >= C, !.
+max3(_,_,C,C).
+
+
+%Lab7 - ex 5
+leaf_list(t(K,nil,nil),[K]) :- !.
+leaf_list(t(_,L,R),Rez) :-
+    leaf_list(L,LL), 
+    leaf_list(R,LR), 
+    append(LL,LR,Rez).
+
+
+%Lab 7 - ex 8 
+is_symmetric(nil) :- true.
+is_symmetric(t(K,L,R)) :-
+    is_mirror(t(K,L,R),t(K,L,R)).
+
+is_mirror(nil,nil) :- true.
+is_mirror(t(Root1,L1,R1),t(Root2,L2,R2)) :-
+    Root1 =:= Root2,
+    is_mirror(L1,R2), 
+    is_mirror(R1,L2).
+
+%Lab 7 - ex 9 
+internal_list(t(_,nil,nil), []).
+internal_list(t(K,L,R),[K|Rez]) :-
+    internal_list(L,L1), 
+    internal_list(R,L2), 
+    append(L1,L2,Rez).
+
+%lab7 - ex 4
+delete_key(Key, t(Key,L,nil), L) :- !.
+delete_key(Key, t(Key,nil,R), R) :- !.
+delete_key(Key, t(Key,L,R), t(Succ,L,NR)) :- 
+    !, 
+    get_succ(R, Succ, NR).
+delete_key(Key, t(K,L,R), t(K,NL,R)) :- 
+    Key < K, 
+    !, 
+    delete_key(Key, L, NL).
+delete_key(Key, t(K,L,R), t(K,L,NR)) :- 
+    delete_key(Key, R, NR).
+
+get_succ(t(Succ,nil,_), Succ, nil) :- !.
+get_succ(t(_,L,_), Succ, NL) :- 
+    get_succ(L, Succ, NL).
+
+
+
+    
+

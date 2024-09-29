@@ -1,0 +1,22 @@
+get_last([],L,_).
+get_last([H],[H|L],L) :- atomic(H), !. //daca e atomic si e ultimu, il pun in lista diferenta 
+get_last([H|T],L,R) :- atomic(H), !, get_last(T,L,R).
+get_last([H|T],L,R) :- get_last(H,L,Int), get_last(T,Int,R). //un append 
+
+
+%preorder ONLY the keys from a BST
+tree_2_list_pre(nil,L,L).
+tree_2_list_pre(t(Left,Key,Right),[Key|First],Last) :- 
+	tree_2_list(Right,Int,Last), 
+	tree_2_list(Left,First,Int).
+
+-> the code is correct only if the initial call sets the last argument to an empty list 
+-> ALFTEL SE PUN SI ALEA PE CARE LE AM IN LISTA A DOUA!!!
+
+
+%MAX DELETE EFICIENT, SI STABIL - IA MEREU PRIMU MAXIM 
+max_delete([X|T],M,[X|R]) :- 
+	max_delete(T,M,R),
+	X < M, % stabilitate(fara egalitate), 
+	!.
+max_delete([X|T],X,T).

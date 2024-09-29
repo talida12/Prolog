@@ -1,0 +1,796 @@
+%Pregatire colocviu
+%1. cmmdc
+cmmdc(X,X,X) :- !.
+cmmdc(X,Y,Z) :- X > Y,  
+    !,
+    Diff is X - Y, 
+    cmmdc(Diff,Y,Z).
+cmmdc(X,Y,Z) :-
+    Diff is Y - X, 
+    cmmdc(X,Diff,Z).
+
+%2. cmmmc = X * Y / cmmmc
+cmmmc(0,_,0).
+cmmmc(X,Y,Rez) :- 
+    Product is X*Y, 
+    cmmmc(X,Y,Product,Rez).
+cmmmc(X,X,Product,Rez) :- 
+    Rez is Product div X, !.
+cmmmc(X,Y,Product,Rez) :-
+    X > Y, !, 
+    Diff is X - Y, 
+    cmmmc(Diff,Y,Product,Rez).
+cmmmc(X,Y,Product,Rez) :-
+    Diff is Y - X, 
+    cmmmc(X,Diff,Product,Rez).
+
+%3. Calculați divizorii unui număr natural.
+divisor(1,[1]).
+divisor(Nr,Divs) :- 
+    Half is Nr div 2,
+    End is Half + 1, 
+    divisor(Nr,2,End,[1],Divs).
+divisor(Nr,End,End,Acc,AccNew) :- !, append(Acc,[Nr],AccNew).
+divisor(Nr,Current,End,Acc,Divs) :-
+    0 is Nr mod Current, 
+    !,
+    CurrNew is Current + 1, 
+    append(Acc, [Current], AccNew), 
+    divisor(Nr,CurrNew,End,AccNew,Divs).
+divisor(Nr,Current,End,Acc,Divs) :-
+    CurrNew is Current + 1, 
+    divisor(Nr,CurrNew,End,Acc,Divs).
+
+%4. Convertiți un număr în binar (puterile lui 2 cresc de la dreapta la stânga)
+to_binary(Nr,BD) :- to_binary(Nr,[],BD).
+to_binary(0,Acc,Acc) :- !.
+to_binary(Nr,Acc,BD) :-
+    Q is Nr div 2, 
+    R is Nr mod 2, 
+    to_binary(Q,[R|Acc],BD).
+
+%5. Inversați un număr natural.
+reverse(Nr,Reversed) :- reverse(Nr,0,Reversed).
+reverse(0,Acc,Acc) :- !.
+reverse(Nr,Acc,Reversed) :-
+    Digit is Nr mod 10, 
+    NewNr is Nr div 10,
+    Rez1 is Acc*10, 
+    NewAcc is Rez1 + Digit,
+    reverse(NewNr,NewAcc,Reversed).
+
+
+%6.Calculați suma elementelor unei liste. 
+suma([],0).
+suma([H|T],Sum) :-
+    suma(T,PartialSum), 
+    Sum is H + PartialSum.
+
+%7. Dublați elementele impare și ridicați la pătrat cele pare.
+numbers([],[]).
+numbers([H|T],[Squared|Rez]) :- 
+    0 is H mod 2, !, 
+    Squared is H*H, 
+    numbers(T,Rez).
+numbers([H|T],[Double|Rez]) :-
+    Double is H*2, 
+    numbers(T,Rez).
+
+%8. Extrageți numerele pare în E și numerele impare în O.
+%Ex: ? – separate_parity([1,2,3,4,5,6], E, O). 
+separate_parity([],[],[]).
+separate_parity([H|T],[H|E],O) :-
+    0 is H mod 2, !, 
+    separate_parity(T,E,O).
+separate_parity([H|T],E,[H|O]) :-
+    separate_parity(T,E,O).
+    
+%9. Înlocuiți toate aparițiile lui X cu Y. 
+replace_all(_,_,[],[]).
+replace_all(X,Y,[X|T],[Y|R]) :-
+    !, replace_all(X,Y,T,R).
+replace_all(X,Y,[H|T],[H|R]) :-
+    replace_all(X,Y,T,R).
+
+%10.
+convertDL2CL(LS,LE,[]) :-
+    LS == LE, !.
+convertDL2CL([H|LS],LE,[H|R]) :-
+    convertDL2CL(LS,LE,R).
+
+replace_all_DL(X,S,E,Y,R) :- 
+    convertDL2CL(S,E,List), 
+    replace_all_DL(X,Y,List,R).
+replace_all_DL(_,_,[],[]).
+replace_all_DL(X,Y,[X|T],[Y,X,Y|Rez]) :- !,
+    replace_all_DL(X,Y,T,Rez).
+replace_all_DL(X,Y,[H|T],[H|Rez]) :- 
+    replace_all_DL(X,Y,T,Rez).
+
+%11.
+delete_pos_even(List,Nr,R) :-
+    delete_pos_even(List,Nr,1,R).
+delete_pos_even([],_,_,[]).
+delete_pos_even([X|T],X,Pos,R) :-
+    0 is Pos mod 2, 
+    !,
+    NextPos is Pos+1, 
+    delete_pos_even(T,X,NextPos,R).
+delete_pos_even([X|T],X,Pos,[X|R]) :-
+    !,
+    NextPos is Pos+1, 
+    delete_pos_even(T,X,NextPos,R).
+delete_pos_even([H|T],X,Pos,[H|R]) :-
+    NextPos is Pos+1,
+    delete_pos_even(T,X,NextPos,R).
+
+%12.
+delete_kth(List,K,R) :- 
+    delete_kth(List,K,1,R).
+delete_kth([],_,_,[]).
+delete_kth([_|T],K,K,R) :- 
+    !,
+    delete_kth(T,K,1,R).
+delete_kth([H|T],K,Current,[H|R]) :-
+    Next is Current + 1,
+    delete_kth(T,K,Next,R).
+
+%13. Ștergeți elementele de pe poziții divizibile cu K de la finalul listei. 
+delete_kth_end(List,K,R) :- delete_kth_end(List,K,_,R).
+delete_kth_end([],_,0,[]).
+delete_kth_end([_|T],K,CountNew,R) :-
+    delete_kth_end(T,K,Count,R), 
+    CountNew is Count+1, 
+    0 is CountNew mod K, !.
+delete_kth_end([H|T],K,CountNew,[H|R]) :- 
+    delete_kth_end(T,K,Count,R), 
+    CountNew is Count+1.
+
+%14.
+find_min([H|T],Min) :-
+    find_min(T,H,Min).
+find_min([],Min,Min).
+find_min([H|T],CurrentMin,Min) :-
+    H < CurrentMin, !,
+    find_min(T,H,Min).
+find_min([_|T],CurrentMin,Min) :-
+    find_min(T,CurrentMin,Min).
+
+delete_min(List,Rez) :-
+    find_min(List,Min), 
+    delete_min(List,Min,Rez).
+delete_min([],_,[]).
+delete_min([H|T],H,Rez) :-
+    !, 
+    delete_min(T,H,Rez).
+delete_min([H|T],Min,[H|Rez]) :-
+    delete_min(T,Min,Rez).
+
+%eficient:
+delete_min2([H|T],Min,[H|R]) :- 
+    delete_min2(T,Min,R), 
+    H > Min, !.
+delete_min2([H|T],H,T).
+
+%15.
+delete_first([Elem|T],Elem,T) :- !.
+delete_first([H|T],Elem,[H|Rez]) :-
+    delete_first(T,Elem,Rez).
+
+sel_sort_min(L,[Min|Sorted]) :-
+    find_min(L,Min), 
+    delete_first(L,Min,Rez), 
+    sel_sort_min(Rez,Sorted).
+sel_sort_min([],[]).
+
+
+delete_duplicates(List,R) :-
+    sel_sort_min(List,[H|T]), 
+    delete_duplicates(T,H,Rez), 
+    R = [H|Rez].
+%pastram mereu dupa noi ultimu numar vizitat
+delete_duplicates([],_,[]).
+delete_duplicates([H|T],H,Rez) :-
+    !,
+    delete_duplicates(T,H,Rez). 
+delete_duplicates([H|T],_,[H|Rez]) :-
+    delete_duplicates(T,H,Rez).
+
+%16.
+reverse_list(List,Rez) :-
+    reverse_list(List,[],Rez).
+reverse_list([H|T],Acc,Rez) :-
+    reverse_list(T,[H|Acc],Rez).
+reverse_list([],Acc,Acc).
+
+%17.
+reverse_k(List,K,Rez) :-
+    reverse_k(List,0,K,Rez).
+reverse_k([],_,_,[]).
+reverse_k([H|T],Current,K,[H|Rez]) :-
+    Current < K, 
+    !, 
+    New is Current + 1, 
+    reverse_k(T,New,K,Rez).
+reverse_k(List,K,K,Rez) :-
+    inverse(List,Rez).
+
+inverse(List,Rez) :-
+    inverse(List,[],Rez).
+inverse([],Acc,Acc).
+inverse([H|T],Acc, Rez) :-
+    AccNew = [H|Acc],
+    inverse(T,AccNew,Rez).
+
+%18.
+rle_encode([H|T],Rez) :-
+    rle_encode(T,H,1,Rez).
+rle_encode([],X,Acc,[[X,Acc]]).
+rle_encode([H|T],H,Acc,Rez) :-
+    !,
+    AccNew is Acc + 1,
+    rle_encode(T,H,AccNew,Rez).
+rle_encode([H|T],X,Acc,[[X,Acc]|Rez]) :-
+    rle_encode(T,H,1,Rez).
+
+
+%19.
+rle_encode1([H|T],Rez) :-
+    rle_encode1(T,H,1,Rez).
+rle_encode1([],X,Acc,[(X,Acc)]) :-
+    Acc \= 1, 
+    !.
+rle_encode1([],X,_,[X]).
+rle_encode1([H|T],H,Acc,Rez) :- 
+    !,
+    AccNew is Acc + 1, 
+    rle_encode1(T,H,AccNew,Rez).
+rle_encode1([H|T],X,Acc,[(X,Acc)|Rez]) :-
+    Acc \= 1, 
+    !,
+    rle_encode1(T,H,1,Rez).
+rle_encode1([H|T],X,_,[X|Rez]) :-
+    rle_encode1(T,H,1,Rez).
+
+%20.
+rle_decode([],[]).
+rle_decode([[_,0]|T], Rez) :-
+    !,
+    rle_decode(T,Rez).
+rle_decode([[H,Nr]|T], [H|Rez]) :-
+    NrNew is Nr - 1, 
+    rle_decode([[H,NrNew]|T],Rez).
+%21.
+remove_last([X],[],X) :- !.
+remove_last([H|T],[H|Rez],Last) :-
+   	remove_last(T,Rez,Last).
+
+rotate_k(List,K,Rez) :- 
+    rotate_k(List,0,K,Rez).
+rotate_k(List,K,K,List) :- !.
+rotate_k(List,Count,K,Rez) :-
+    remove_last(List,RP,Last), 
+    CountNew is Count+1, 
+    rotate_k([Last|RP],CountNew,K,Rez).
+
+%22.
+find_min_char([H|T],Min) :-
+    char_code(H,CH), 
+    find_min_char(T,H,CH,Min).
+find_min_char([],CurrentMin,_,CurrentMin).
+find_min_char([H|T],_,MinCode,Min) :-
+    char_code(H,CH), 
+    CH < MinCode, 
+    !, 
+    find_min_char(T,H,CH,Min).
+find_min_char([_|T],CurrentMin,MinCode,Min) :-
+    find_min_char(T,CurrentMin,MinCode,Min).
+    
+sort_chars(List,[Min|Rez]) :-
+    find_min_char(List,Min), 
+    delete_first(List,Min,Partial), 
+    sort_chars(Partial,Rez).
+sort_chars([],[]).
+
+%23.
+find_list_min([H|T],Min) :-
+    length(H,Len),
+    find_list_min(T,H,Len,Min).
+find_list_min([],CurrentMin,_,CurrentMin).
+find_list_min([H|T],_,MinLen,Min) :-
+    length(H,Len), 
+    Len < MinLen, !, 
+    find_list_min(T,H,Len,Min).
+find_list_min([_|T],CurrentMin,MinLen,Min) :-
+    find_list_min(T,CurrentMin,MinLen,Min).
+
+sort_len(List,[Min|Rez]) :-
+    find_list_min(List,Min), 
+    delete_first(List,Min,Partial), 
+    sort_len(Partial,Rez).
+sort_len([],[]).
+
+
+%24.
+remove_dup_on_odd_pos(List,Rez) :-
+    remove_dup_on_odd_pos(List,List,1,Rez).
+remove_dup_on_odd_pos([],_,_,[]).
+remove_dup_on_odd_pos([H|T],List,Idx,Rez) :-
+    delete_first(List,H,P), 
+    member(H,P), 
+    1 is Idx mod 2, 
+    !,
+    IdxNew is Idx+1,
+    remove_dup_on_odd_pos(T,List,IdxNew,Rez).
+remove_dup_on_odd_pos([H|T],List,Idx,[H|Rez]) :-
+    IdxNew is Idx+1, 
+    remove_dup_on_odd_pos(T,List,IdxNew,Rez).
+
+%3 LISTE ADANCI 
+%25. 
+depth_list([],1). 
+depth_list([H|T],R) :- 
+    atomic(H),!,
+    depth_list(T,R).
+depth_list([H|T],R) :- 
+    depth_list(H,R1), 
+    depth_list(T,R2), 
+    R3 is R1 + 1, 
+    max2(R3,R2,R).
+
+%26.
+flatten_deep([H|_],[]) :- 
+    var(H), !.
+flatten_deep([H|T],[H|Rez]) :- 
+    atomic(H), !, 
+    flatten_deep(T,Rez).
+flatten_deep([H|T],Rez) :- !, 
+    flatten_deep(H,Rez1), 
+    flatten_deep(T,Rez2), 
+    append(Rez1,Rez2,Rez).
+flatten_deep([],[]).
+
+%27.
+flatten_only_depth(List,X,Rez) :- 
+    flatten_only_depth(List,1,X,Rez).
+flatten_only_depth([],_,_,[]).
+flatten_only_depth([H|T],X,X,[H|Rez]) :-
+    atomic(H), !, 
+    flatten_only_depth(T,X,X,Rez).
+flatten_only_depth([H|T],I,X,Rez) :- 
+    atomic(H), !,
+    flatten_only_depth(T,I,X,Rez).
+flatten_only_depth([H|T],I,X,Rez) :- 
+    IH is I+1,
+    flatten_only_depth(H,IH,X,RezH), 
+    flatten_only_depth(T,I,X,RezT), 
+    append(RezH,RezT,Rez).
+
+%28. %suma elem de la nivelul k
+sum_k(List,K,Sum) :- 
+    sum_k(List,1,K,Sum).
+sum_k(L,_,_,0) :- var(L), !.
+sum_k([H|T],K,K,Sum) :- 
+    atomic(H),!, 
+    sum_k(T,K,K,SumT), 
+    Sum is H+SumT.
+sum_k([H|T],N,K,Sum) :- 
+    atomic(H), !,
+    sum_k(T,N,K,Sum).
+sum_k([H|T],N,K,Sum) :- 
+    %daca intru in lista,niv de imbricatie creste
+    %cand ies din lista, niv de imbricatie scade
+    NN is N+1, 
+    sum_k(H,NN,K,SumH), 
+    sum_k(T,N,K,SumT), 
+    Sum is SumH+SumT.
+
+%29.
+count_lists([],1).
+count_lists([H|T],Rez) :- 
+    not(atomic(H)), !, 
+    count_lists(H,Rez1), 
+    count_lists(T,Rez2), 
+    Rez is Rez1 + Rez2.
+count_lists([_|T],Rez) :-  
+    count_lists(T,Rez).
+
+%30.
+replace_all_deep(X,Y,[X|T],[Y|Rez]) :-
+    atomic(X), !, 
+    replace_all_deep(X,Y,T,Rez).
+replace_all_deep(X,Y,[H|T],Rez) :- 
+    replace_all_deep(X,Y,H,Rez1), 
+    replace_all_deep(X,Y,T,Rez2), 
+    append([Rez1],Rez2,Rez), !.
+replace_all_deep(X,Y,[H|T],[H|Rez]) :-
+    replace_all_deep(X,Y,T,Rez).
+replace_all_deep(_,_,[],[]).
+
+%31 inlocuire secventa cu o adancime constanta cu lungimea in lista adanca 
+complete_result(Acc,RezH,RezT,[Acc|[RezH|RezT]]) :- 
+    Acc > 0, !.
+complete_result(_,RezH,RezT,[RezH|RezT]).
+
+len_con_depth(List,Rez) :- 
+    len_con_depth(List,0,Rez).
+len_con_depth([],Acc,[Acc]) :- Acc > 0, !.
+len_con_depth([],_,[]).
+len_con_depth([H|T],Acc,Rez) :- 
+    atomic(H), !, 
+    AccNew is Acc+1, 
+    len_con_depth(T,AccNew,Rez).
+len_con_depth([H|T],Acc,Rez) :- 
+    %incep o lista noua, contorul se reinitializeaza
+    len_con_depth(H,0,RezH), 
+    len_con_depth(T,0,RezT), 
+    complete_result(Acc,RezH,RezT,Rez).
+
+%4 ARBORI 
+
+%33.
+tree(t(6, t(4, t(2, nil, nil), t(5, nil, nil)), t(9, t(7, nil, nil), nil))). 
+inorder(nil,[]).
+inorder(t(K,L,R),Rez) :- 
+    inorder(L,LR), 
+    inorder(R,RR), 
+    append(LR,[K|RR],Rez).
+%34.
+collect_k(nil,[]).
+collect_k(t(K,nil,nil),[K]) :- !.
+collect_k(t(_,L,R),Rez) :-
+    collect_k(L,LR), 
+    collect_k(R,RR), 
+    append(LR,RR,Rez).
+
+%35. 
+bst35(t(10, t(7,t(3,nil,nil),t(8,nil,nil)), t(11,nil,nil))).
+tree_bst(t(6,t(4,t(2,nil,nil),t(5,nil,nil)),t(9,t(7,nil,nil),nil))).
+test(t(7, t(3, nil, nil), t(9, t(2, nil, nil), nil))).
+
+min3(A,B,C,A) :- A =< B, A =< C, !.
+min3(A,B,C,B) :- B =< A, B =< C, !.
+min3(_,_,C,C).
+
+min2(A,B,A) :- A =< B, !.
+min2(_,B,B).
+
+max3(A,B,C,A) :- A >= B, A >= C, !.
+max3(A,B,C,B) :- B >= A, B >= C, !.
+max3(_,_,C,C).
+
+find_min_tree(t(K,nil,nil),K).
+find_min_tree(t(K,L,nil),Min) :- 
+    find_min_tree(L,MinL), 
+    min2(K,MinL,Min).
+find_min_tree(t(K,nil,R),Min) :- 
+    find_min_tree(R,MinR), 
+    min2(K,MinR,Min).
+find_min_tree(t(K,L,R),Min) :- 
+    find_min_tree(L,MinL), 
+    find_min_tree(R,MinR), 
+    min3(K,MinL,MinR,Min).
+
+find_max_tree(t(K,nil,nil),K).
+find_max_tree(t(K,L,nil),Max) :- 
+    find_max_tree(L,MaxL), 
+    max2(K,MaxL,Max).
+find_max_tree(t(K,nil,R),Max) :- 
+    find_max_tree(R,MaxR), 
+    max2(K,MaxR,Max).
+find_max_tree(t(K,L,R),Max) :- 
+    find_max_tree(L,MaxL), 
+    find_max_tree(R,MaxR), 
+    max3(K,MaxL,MaxR,Max).
+
+%eficient
+is_bst2(Tree) :-
+    is_bst2(Tree, _).
+is_bst2(t(K,nil,nil),K).
+is_bst2(t(K,nil,R),RMin) :- !,
+    is_bst2(R,RMin),
+    K =< RMin.
+is_bst2(t(K,L,nil),LMax) :- !,
+    is_bst2(L,LMax),
+    K >= LMax.
+is_bst2(t(K,L,R),K) :-
+    is_bst2(L,LMax),
+    is_bst2(R,RMin),
+    K >= LMax, 
+    K =< RMin, !.
+
+
+is_bst(nil).
+is_bst(t(_,nil,nil)).
+is_bst(t(K,L,nil)) :-
+    find_max_tree(L,MaxL), 
+    K > MaxL, 
+    is_bst(L).
+is_bst(t(K,nil,R)) :-
+    find_min_tree(R,MinR), 
+    K < MinR, 
+    is_bst(R).
+is_bst(t(K,L,R)) :-
+    find_max_tree(L,MaxL), 
+    find_min_tree(R,MinR), 
+    K > MaxL, K < MinR, 
+    is_bst(L), is_bst(R).
+
+%36.
+i_tree(t(26,t(14,t(2,_,_),t(15,_,_)),t(50,t(35,t(29,_,_),_),t(51,_,t(58,_,_))))). 
+collect_odd_from_1child(t(_,L,R),[]) :- 
+    var(L), var(R), !.
+collect_odd_from_1child(t(K,L,R),[K|Rez]) :-
+    var(R),
+    1 is K mod 2, !, 
+    collect_odd_from_1child(L,Rez).
+collect_odd_from_1child(t(K,L,R),[K|Rez]) :- 
+    var(L), 
+    1 is K mod 2, !,
+    collect_odd_from_1child(R,Rez).
+collect_odd_from_1child(t(_,L,R),Rez) :-
+    collect_odd_from_1child(L,LR), 
+    collect_odd_from_1child(R,RR), 
+    append(LR,RR,Rez).
+
+%37.
+i3_tree(t(2,t(8,_,_,_),t(3,_,_,t(4,_,_,_)),t(5,t(7,_,_,_),t(6,_,_,_),t(1,_,_,t(9,_,_,_))))).
+collect_between(T,_,_,L,L) :- 
+    var(T), !.
+collect_between(t(K,L,M,R),X,Y,[K|LS],LE) :- 
+    K >= X, K =< Y, !, 
+    collect_between(L,X,Y,LS,Int1),
+    collect_between(M,X,Y,Int1,Int2),
+    collect_between(R,X,Y,Int2,LE).
+collect_between(t(_,L,M,R),X,Y,LS,LE) :- 
+    collect_between(L,X,Y,LS,Int1),
+    collect_between(M,X,Y,Int1,Int2),
+    collect_between(R,X,Y,Int2,LE).
+
+%38.
+binary_tree(t(5,t(10,t(7,nil,nil),t(10,t(4,nil,nil),t(3,nil,t(2,nil,nil)))),t(16,nil,nil))).
+collect_even_from_leaf(nil,L,L).
+collect_even_from_leaf(t(K,nil,nil),[K|L],L) :- 
+    0 is K mod 2, !.
+collect_even_from_leaf(t(_,L,R),LS,LE) :- 
+    collect_even_from_leaf(L,LS,Int), 
+    collect_even_from_leaf(R,Int,LE).
+
+%39.
+%tree39(t(2,t(8,_,_,_),t(3,_,_,t(1,_,_,_)),t(5,t(7,_,_,_),t(6,_,_,_),t(1,_,_,t(9,_,_,_))))). 
+tree39(t(2,t(8,nil,nil,nil),t(3,nil,nil,t(1,nil,nil,nil)),t(5,t(7,nil,nil,nil),t(6,nil,nil,nil),t(1,nil,nil,t(9,nil,nil,nil))))). 
+
+%eficient - calculez min in timp ce il parcurg
+%tree39(t(2,t(8,_,_,_),t(3,_,_,t(1,_,_,_)),t(5,t(7,_,_,_),t(6,_,_,_),t(1,_,_,t(9,_,_,_))))). 
+tree39(t(2,t(8,nil,nil,nil),t(3,nil,nil,t(1,nil,nil,nil)),t(5,t(7,nil,nil,nil),t(6,nil,nil,nil),t(1,nil,nil,t(9,nil,nil,nil))))). 
+
+//astea mai sunt puse o data mai sus!!
+min3(A,B,C,A) :- A =< B, A =< C, !.
+min3(A,B,C,B) :- B =< A, B =< C, !.
+min3(_,_,C,C).
+
+min2(A,B,A) :- A =< B, !.
+min2(_,B,B).
+
+%eficient - calculez min in timp ce il parcurg
+replace_min(t(K,L,M,R),Rez) :- 
+    replace_min(t(K,L,M,R),K,_,Rez).
+replace_min(nil,Root,Root,nil).
+replace_min(t(K,nil,nil,nil),K,K,t(K,nil,nil,nil)) :- !.
+replace_min(t(K,L,M,R),Root,K,t(Root,NL,NM,NR)) :- 
+    replace_min(L,Root,MinL,NL), 
+    replace_min(M,Root,MinM,NM),
+    replace_min(R,Root,MinR,NR),
+    min3(MinL,MinR,MinM,MinP), 
+    K =< MinP, !.
+replace_min(t(K,L,M,R),Root,MinP,t(K,NL,NM,NR)) :-
+    replace_min(L,Root,MinL,NL), 
+    replace_min(M,Root,MinM,NM),
+    replace_min(R,Root,MinR,NR),
+	min3(MinL,MinM,MinR,MinP).
+
+%40. 
+tree_k(t(6, t(4, t(2, nil, nil), t(5, nil, nil)), t(9, t(7, nil, nil), nil))). 
+collect_k(T,K,R) :- 
+    collect_k(T,1,K,R).
+collect_k(nil,_,_,[]).
+collect_k(t(Key,_,_),K,K,[Key]) :- !.
+collect_k(t(_,L,R),Depth,K,Rez) :- 
+    NextDepth is Depth+1, 
+    collect_k(L,NextDepth,K,LR), 
+    collect_k(R,NextDepth,K,RR), 
+    append(LR,RR,Rez).
+
+%41.
+odd_tree(t(26,t(14,t(2,_,_),t(15,_,_)),t(50,t(35,t(29,_,_),_),t(51,_,t(58,_,_))))).
+
+collect_all_odd_depth(T,R) :- 
+    collect_all_odd_depth(T,0,R).
+collect_all_odd_depth(V,_,[]) :- var(V), !.
+collect_all_odd_depth(t(K,L,R),Depth,Rez) :-
+    1 is Depth mod 2, !, 
+    NextDepth is Depth+1, 
+    collect_all_odd_depth(L,NextDepth,LR), 
+    collect_all_odd_depth(R,NextDepth,RR), 
+    append([K|LR],RR,Rez).
+collect_all_odd_depth(t(_,L,R),Depth,Rez) :- 
+    NextDepth is Depth+1, 
+    collect_all_odd_depth(L,NextDepth,LR), 
+    collect_all_odd_depth(R,NextDepth,RR), 
+    append(LR,RR,Rez).
+
+%42.
+insert_ord(E,[H|T],[H|R]) :- 
+    E >= H, !, insert_ord(E, T, R).
+insert_ord(X,List,[X|List]).
+
+find_median(List,Median) :-
+    length(List,Len),
+    Len>0,
+    find_median(List,0,Len,Median).
+find_median([H|_],Count,Len,H) :- 
+    Count is Len div 2, !.
+find_median([_|T], Count, Len, Median) :- 
+    CountNew is Count + 1, 
+    find_median(T, CountNew, Len, Median).
+
+merge_them([], L2, L2).
+merge_them(L1, [], L1).
+merge_them([H1|T1], [H2|T2], [H1|Rez]) :- 
+    H1 < H2, !, merge_them(T1, [H2|T2], Rez).
+merge_them([H1|T1], [H2|T2], [H2|Rez]) :- 
+    merge_them([H1|T1], T2, Rez).
+
+
+collect_keys(nil, Acc, Acc).
+collect_keys(t(K,L,R), Acc, Keys) :-
+    collect_keys(L, Acc, LKeys),
+    collect_keys(R, [K|LKeys], Keys).
+
+collect_subtrees(nil,_,[]).
+collect_subtrees(t(K,L,R), K, [t(K,L,R)|Subtrees]) :-
+    collect_subtrees(L, K, LSubtrees),
+    collect_subtrees(R, K, RSubtrees),
+    append(LSubtrees, RSubtrees, Subtrees).
+collect_subtrees(t(_,L,R), K, Subtrees) :-
+    collect_subtrees(L, K, LSubtrees),
+    collect_subtrees(R, K, RSubtrees),
+    append(LSubtrees, RSubtrees, Subtrees).
+
+median(Tree,MedianKey,Subtrees) :-
+    collect_keys(Tree,[],Keys),
+    msort(Keys,SortedKeys),
+    find_median(SortedKeys,MedianKey),
+    collect_subtrees(Tree,MedianKey,Subtrees).
+
+%43.
+h_tree(t(5,t(10,t(7,nil,nil),t(10,t(4,nil,nil),t(3,nil,t(2,nil,nil)))),t(16,nil,nil))). 
+max2(A,B,A) :- A >= B, !.
+max2(_,B,B).
+
+compute_height(nil,-1).
+compute_height(t(_,L,R),Height) :- 
+    compute_height(L,HL), 
+    compute_height(R,HR), 
+    max2(HL,HR,HMax), 
+    Height is HMax + 1.
+
+height_each(nil,nil).
+height_each(t(K,L,R),t(NewK,NL,NR)) :- 
+    compute_height(t(K,L,R),NewK), 
+    height_each(L,NL), 
+    height_each(R,NR).
+
+%eficient-calculez inaltimea in timp ce parcurg arborele
+% arbore complet:
+height_each2(nil,-1,nil).
+height_each2(t(_,L,R),Height,t(Height,NL,NR)) :- 
+    height_each2(L,LH,NL), 
+    height_each2(R,RH,NR), 
+    max2(LH,RH,Max), 
+    Height is Max+1.
+
+tree43(t(2,t(4,t(5,_,_),t(7,_,_)),t(3,t(0,t(4,_,_),_),t(8,_,t(5,_,_))))). 
+%arbore incomplet:
+height_each3(T,-1,_) :- var(T), !.
+height_each3(t(_,L,R),Height,t(Height,NL,NR)) :- 
+    height_each3(L,LH,NL), 
+    height_each3(R,RH,NR), 
+    max2(LH,RH,Max), 
+    Height is Max+1.
+
+%44.
+tree44(t(14,t(6,t(4,nil,nil),t(12,t(10,nil,nil),nil)),t(17,t(16,nil,nil),t(20,nil,nil)))).
+compute_sum(nil,0). 
+compute_sum(t(K,L,R),Sum) :- 
+    compute_sum(L,LSum), 
+    compute_sum(R,RSum), 
+    Sum is LSum+RSum+K.
+
+sum_subtree(nil,_,nil).
+sum_subtree(t(K,L,R),K,t(Sum,nil,nil)) :-
+    compute_sum(t(K,L,R),Sum), !.
+sum_subtree(t(Key,L,R),K,t(Key,NL,NR)) :- 
+    sum_subtree(L,K,NL), 
+    sum_subtree(R,K,NR).
+
+%eficient: calculez suma pe masura ce parcurg arborele
+sum_subtree2(nil,_,0,nil).
+sum_subtree2(t(K,L,R),K,Sum,t(Sum,nil,nil)) :- !,
+    sum_subtree2(L,K,SumL,_), 
+    sum_subtree2(R,K,SumR,_), 
+    Sum is SumL+SumR+K.
+sum_subtree2(t(Key,L,R),K,Sum,t(Key,NL,NR)) :-
+    sum_subtree2(L,K,SumL,NL), 
+    sum_subtree2(R,K,SumR,NR), 
+    Sum is SumL+SumR+Key.
+
+%5 GRAFURI
+
+%45.
+:- dynamic node/1.
+:- dynamic visited/1.
+
+node(1).
+node(2).
+node(3).
+node(4).
+node(5).
+
+collect_nodes([X|Rez]) :- 
+    node(X), 
+    not(visited(X)), !,
+    assertz(visited(X)), 
+    collect_nodes(Rez).
+collect_nodes([]).
+
+%46.
+edge(1,2). edge(2,1). edge(1,4).
+edge(1,3). edge(3,2).
+:- dynamic info/3.
+:- dynamic visited/2.
+
+compute_degrees :- 
+    edge(X,Y), 
+    not(visited(X,Y)),
+    assertz(visited(X,Y)),
+    process(X,Y).
+compute_degrees.
+
+process(X,Y) :- 
+    info(X,OutX,InX), 
+    info(Y,OutY,InY), 
+    retract(info(X,OutX,InX)), 
+    retract(info(Y,OutY,InY)), 
+    OutXNew is OutX+1, 
+    InYNew is InY+1,
+    assertz(info(X,OutXNew,InX)), 
+    assertz(info(Y,OutY,InYNew)).
+process(X,Y) :- 
+    info(X,_,_),
+    not(info(Y,_,_)), !,
+    retract(info(X,OutX,InX)),
+    OutXNew is OutX+1,
+    assertz(info(X,OutXNew,InX)), 
+    assertz(info(Y,0,1)).
+process(X,Y) :-  
+    info(Y,_,_),  
+    not(info(X,_,_)),  
+    retract(info(Y,OutY,InY)),
+    InYNew is InY+1,
+    assertz(info(X,1,0)),  
+    assertz(info(Y,0,1)).
+process(X,Y) :- 
+    assertz(info(X,1,0)), 
+    assertz(info(Y,0,1)).
+
+    
+    
+
+
+
+
+
+
+
+

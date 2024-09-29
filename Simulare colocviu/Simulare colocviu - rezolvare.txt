@@ -1,0 +1,144 @@
+%unique digits
+verify(Rez,D,[D|Rez]) :- 
+    not(member(D,Rez)), !.
+verify(Rez,_,Rez).
+
+unique_digits(0,[]) :- !.
+unique_digits(Nr,Rez) :- 
+    NrNew is Nr div 10, 
+    D is Nr mod 10,
+    unique_digits(NrNew,R), 
+    verify(R,D,Rez).
+
+%cheia frunzelor = suma ascendentilor 
+sum_tree(t(5,t(2,t(1,nil,nil),nil),t(7,t(6,nil,nil),t(8,nil,t(9,nil,nil))))).
+
+replace_sum(Tree,Rez) :- 
+    replace_sum(Tree,0,Rez).
+replace_sum(t(_,nil,nil),Sum,t(Sum,nil,nil)).
+replace_sum(t(K,nil,R),Sum,t(K,nil,NR)) :- 
+    SumNew is Sum+K, 
+    replace_sum(R,SumNew,NR).
+replace_sum(t(K,L,nil),Sum,t(K,NL,nil)) :- 
+    SumNew is Sum+K, 
+    replace_sum(L,SumNew,NL).
+replace_sum(t(K,L,R),Sum,t(K,NL,NR)) :- 
+    SumNew is Sum+K,
+    replace_sum(L,SumNew,NL), 
+    replace_sum(R,SumNew,NR).
+
+% FLATTEN DEPTH 1
+find_product(List,P) :- 
+    find_product(List,1,P).
+find_product([H|T],PP,P) :- 
+    atomic(H), !, 
+    PPN is PP*H,
+    find_product(T,PPN,P).
+find_product([_|T],PP,P) :- 
+    find_product(T,PP,P).
+find_product([],PP,PP).
+ 
+flatten_1(List,Rez,P) :- 
+    flatten_1(List,[],Rez,1,P).
+flatten_1([],Acc,Acc,P,P).
+flatten_1([H|T],Acc,Rez,PP,P) :- 
+    atomic(H), !, 
+    append(Acc,[H],AccNew),
+    PPN is PP*H,
+    flatten_1(T,AccNew,Rez,PPN,P).
+flatten_1([H|T],Acc,Rez,PP,P) :- 
+    find_product(H,PH),
+    PPN is PH*PP,
+    append(Acc,[H],AccNew),
+    flatten_1(T,AccNew,Rez,PPN,P).
+
+
+% ONE DEEP - o singura lista si in rest atomi 
+is_ok(List) :- is_ok(List,0,0).
+is_ok([H|T],LN,AN) :- 
+    atomic(H), !, 
+    ANN is AN+1, 
+    is_ok(T,LN,ANN).
+is_ok([_|T],LN,AN) :- 
+    LNN is LN+1, 
+    is_ok(T,LNN,AN).
+is_ok([],1,AN) :- AN > 1, !.
+
+one_deep([H|T],Rez) :- 
+    atomic(H), !, 
+    one_deep(T,Rez).
+one_deep([H|T],[H|Rez]) :- 
+    is_ok(H), !, 
+    one_deep(H,RezH), 
+    one_deep(T,RezT),
+    append(RezH,RezT,Rez).
+one_deep([H|T],Rez) :- 
+    one_deep(H,RezH), 
+    one_deep(T,RezT), 
+    append(RezH,RezT,Rez).
+one_deep([],[]).
+    
+% LONGEST CHAIN
+reverse_it(List,Rez) :- reverse_it(List,[],Rez). 
+reverse_it([H|T],Acc,Rez) :- 
+    AccNew = [H|Acc], 
+    reverse_it(T,AccNew,Rez).
+reverse_it([],Acc,Acc).
+
+combine_them(List1,List2,K,Rez) :- 
+    reverse_it(List2,Rez2), 
+    append(List1,[K|Rez2],Rez).
+
+longest_chain(t(K,L,R),Rez) :- 
+    find_longest_chain(L,RezL), 
+    find_longest_chain(R,RezR), 
+    combine_them(RezL,RezR,K,Rez).
+
+random_wrapper(LengthL,LengthR,RezL,_,LengthL,RezL) :- LengthL > LengthR, !.
+random_wrapper(_,LengthR,_,RezR,LengthR,RezR).
+
+chain_tree(t(10,t(15,t(8,t(32,nil,nil),t(81,nil,nil)),t(18,nil,nil)), t(25,t(7,nil,t(11,nil,nil)),t(31,nil,nil)))).
+find_longest_chain(Tree,Rez) :- 
+    find_longest_chain(Tree,[],0,_,Rez).
+find_longest_chain(nil,Acc,ChainLength,ChainLength,Acc).
+find_longest_chain(t(K,L,R),Acc,CurrentLength,Length,Rez) :- 
+    NextLength is CurrentLength+1, 
+    find_longest_chain(L,[K|Acc],NextLength,LengthL,RezL), 
+    find_longest_chain(R,[K|Acc],NextLength,LengthR,RezR), 
+    random_wrapper(LengthL,LengthR,RezL,RezR,Length,Rez).
+
+
+%Nota 10 
+anumber(10). anumber(198). anumber(45). anumber(2000). 
+anumber(1). anumber(62). anumber(9). anumber(540). 
+anumber(861). anumber(111). anumber(10).
+
+:- dynamic visited/1.
+:- dynamic numbers/2.
+
+group_numbers :- 
+    anumber(X), 
+    not(visited(X)), 
+    assertz(visited(X)),
+    compute_nr_digits(X,Nr), 
+    process(X,Nr).
+group_numbers.
+
+compute_nr_digits(0,0) :- !.
+compute_nr_digits(Nr,Rez) :- 
+    NrNew is Nr div 10, 
+    compute_nr_digits(NrNew,RP), 
+    Rez is RP+1.
+
+process(X,Nr) :- 
+    numbers(List,Nr), !, 
+    retract(numbers(List,Nr)),
+    assertz(numbers([X|List],Nr)).
+process(X,Nr) :- assertz(numbers([X],Nr)).
+
+
+
+
+
+
+
